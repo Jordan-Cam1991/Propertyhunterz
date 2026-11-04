@@ -396,7 +396,7 @@ const DEFAULT_PROPERTIES = [
     "id": "prop-waterworks-2-181",
     "address": "2/181 Waterworks Road, Ashgrove, QLD 4060",
     "suburb": "Ashgrove",
-    "link": "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
+    "link": "https://www.realestate.com.au/property/2-181-waterworks-rd-ashgrove-qld-4060",
     "advertisedGuide": "Offers from $900,000",
     "modelledPrice": 900000,
     "bedrooms": 3,
@@ -413,9 +413,11 @@ const DEFAULT_PROPERTIES = [
     "quarterlyBodyCorp": 950,
     "monthlyBodyCorp": 316.67,
     "weeklyBodyCorp": 73,
-    "imageUrl": "",
+    "imageUrl": "images/ashgrove-facade.png",
     "floorplanUrl": "",
-    "images": [],
+    "images": [
+      "images/ashgrove-facade.png"
+    ],
     "distances": {
       "workEMP": "24 mins",
       "cityTransit": "15 mins bus (Route 385 express)",
@@ -431,7 +433,7 @@ const DEFAULT_PROPERTIES = [
     "id": "prop-old-northern-2-178",
     "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
     "suburb": "Everton Park",
-    "link": "https://www.realestate.com.au/property-townhouse-qld-everton+park-146399120",
+    "link": "https://www.domain.com.au/2-178-old-northern-road-everton-park-qld-4053-2021074495",
     "advertisedGuide": "Offers From $799,000",
     "modelledPrice": 800000,
     "bedrooms": 3,
@@ -1170,7 +1172,7 @@ class PropertyHunterApp {
                   if (idx === -1) {
                     parsed.unshift(cp);
                     cloudMerged = true;
-                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178') {
+                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178' || cp.id === 'prop-bunya-45-120') {
                     parsed[idx] = { ...parsed[idx], ...cp };
                     cloudMerged = true;
                   }
@@ -1226,7 +1228,7 @@ class PropertyHunterApp {
           if (lidx === -1) {
             parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
             localMerged = true;
-          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178') {
+          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178' || dp.id === 'prop-bunya-45-120') {
             parsedProps[lidx] = { ...parsedProps[lidx], ...JSON.parse(JSON.stringify(dp)) };
             localMerged = true;
           }
@@ -1240,6 +1242,42 @@ class PropertyHunterApp {
       this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.isPropertyDeleted(p));
     }
     
+    // Auto-correct legacy incorrect/broken listing links stored in localStorage
+    if (this.properties && Array.isArray(this.properties)) {
+      let linksUpdated = false;
+      this.properties.forEach(p => {
+        if (p.address && p.address.toLowerCase().includes('178 old northern')) {
+          if (!p.link || p.link.includes('146399120')) {
+            p.link = 'https://www.domain.com.au/2-178-old-northern-road-everton-park-qld-4053-2021074495';
+            linksUpdated = true;
+          }
+        }
+        if (p.address && p.address.toLowerCase().includes('181 waterworks')) {
+          if (!p.link || p.link.includes('147814884')) {
+            p.link = 'https://www.realestate.com.au/property/2-181-waterworks-rd-ashgrove-qld-4060';
+            linksUpdated = true;
+          }
+          if (!p.imageUrl) {
+            p.imageUrl = 'images/ashgrove-facade.png';
+            linksUpdated = true;
+          }
+          if (!p.images || p.images.length === 0) {
+            p.images = ['images/ashgrove-facade.png'];
+            linksUpdated = true;
+          }
+        }
+        if (p.address && p.address.toLowerCase().includes('120 bunya')) {
+          if (!p.link) {
+            p.link = 'https://www.realestate.com.au/property-townhouse-qld-everton+hills-152742596';
+            linksUpdated = true;
+          }
+        }
+      });
+      if (linksUpdated) {
+        localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
+      }
+    }
+
     // Auto-correct legacy duplicate $322 body corporate on non-Bunya properties from earlier bookmarklet sessions
     if (this.properties && Array.isArray(this.properties)) {
       this.properties.forEach(p => {
@@ -3573,7 +3611,7 @@ class PropertyHunterApp {
             </div>
           `}
 
-          ${p.link ? `<div style="margin-top: 6px;"><a href="${p.link}" target="_blank" style="color: var(--terracotta); font-size: 13px; font-weight: 600; text-decoration: none;">View Online Listing ↗</a></div>` : ''}
+          ${p.link ? `<div style="margin-top: 6px;"><a href="${p.link}" target="_blank" style="color: var(--terracotta); font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><span>View Online Listing ${p.link.includes("domain.com.au") ? "on Domain" : (p.link.includes("realestate.com.au") ? "on Realestate.com.au" : "")} ↗</span></a></div>` : ''}
         </div>
       </div>
 

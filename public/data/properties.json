@@ -3,7 +3,7 @@
     "id": "prop-waterworks-2-181",
     "address": "2/181 Waterworks Road, Ashgrove, QLD 4060",
     "suburb": "Ashgrove",
-    "link": "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
+    "link": "https://www.realestate.com.au/property/2-181-waterworks-rd-ashgrove-qld-4060",
     "advertisedGuide": "Offers from $900,000",
     "modelledPrice": 900000,
     "bedrooms": 3,
@@ -20,9 +20,11 @@
     "quarterlyBodyCorp": 950,
     "monthlyBodyCorp": 316.67,
     "weeklyBodyCorp": 73,
-    "imageUrl": "",
+    "imageUrl": "images/ashgrove-facade.png",
     "floorplanUrl": "",
-    "images": [],
+    "images": [
+      "images/ashgrove-facade.png"
+    ],
     "distances": {
       "workEMP": "24 mins",
       "cityTransit": "15 mins bus (Route 385 express)",
@@ -38,7 +40,7 @@
     "id": "prop-old-northern-2-178",
     "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
     "suburb": "Everton Park",
-    "link": "https://www.realestate.com.au/property-townhouse-qld-everton+park-146399120",
+    "link": "https://www.domain.com.au/2-178-old-northern-road-everton-park-qld-4053-2021074495",
     "advertisedGuide": "Offers From $799,000",
     "modelledPrice": 800000,
     "bedrooms": 3,
