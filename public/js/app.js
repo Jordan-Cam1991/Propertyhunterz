@@ -393,259 +393,133 @@ function estimateBrisbaneDistance(address, suburb) {
 
 const DEFAULT_PROPERTIES = [
   {
-      "id": "prop-old-northern-2-178",
-      "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
-      "suburb": "Everton Park",
-      "link": "https://www.realestate.com.au/property-townhouse-qld-everton+park-146399120",
-      "advertisedGuide": "Offers From $799,000",
-      "modelledPrice": 800000,
-      "bedrooms": 3,
-      "bathrooms": 2,
-      "parking": "2 car secure remote garage",
-      "parkingSpaces": 2,
-      "levels": 2,
-      "outdoorSpace": "Private fully fenced courtyard",
-      "standoutFeature": "Generous 187m² build area with 2-car garage & fully fenced courtyard in Everton Park",
-      "lifestyleFit": "Northside lifestyle (Jordan preferred), 5 mins to Callum & Kaitlin, walk to Everton Plaza",
-      "planningRisk": "None flagged",
-      "keyCompromise": "Commute to Eight Mile Plains (~38 mins peak)",
-      "inspectionTimes": "Sat 7 Nov 10:00 am",
-      "quarterlyBodyCorp": 1100,
-      "monthlyBodyCorp": 366.67,
-      "weeklyBodyCorp": 85,
-      "imageUrl": "",
-      "floorplanUrl": "",
-      "images": [],
-      "distances": {
-          "workEMP": "38 mins",
-          "cityTransit": "28 mins express bus (Route 350 / 359)",
-          "shopsWalk": "2 mins drive / 800m to Everton Plaza & Woolworths",
-          "callumKaitlin": "5 mins (Extremely close)",
-          "parentsEmma": "20 mins",
-          "parentsJordan": "30 mins",
-          "airport": "22 mins (via Airport Link)"
-      },
-      "notes": "Contemporary 2-level townhouse built 2017 with large 187m² layout. 3 bedrooms with built-in robes, master with ensuite, 3 toilets, air conditioning, and study. Secure 2-car remote garage and private fully fenced courtyard for the 4 fur babies. 800m to Everton Plaza dining & Woolworths, and only 5 mins to Callum & Kaitlin. Incredible financial cashflow freeing up +$3,165/mo in mortgage payments."
-  },
-  {
-    id: "prop-waterworks-2-181",
-    address: "2/181 Waterworks Road, Ashgrove, Qld 4060",
-    suburb: "Ashgrove",
-    link: "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
-    advertisedGuide: "Offers from $900,000",
-    modelledPrice: 900000,
-    bedrooms: 3,
-    bathrooms: 2,
-    parking: "2 car parking (1 lockup garage + 1 open space)",
-    parkingSpaces: 2,
-    levels: 3,
-    outdoorSpace: "Enclosed rear courtyard & covered balcony",
-    standoutFeature: "City-fringe living 4.5km to CBD, 450m walk to Woolworths / Ashgrove Marketplace, courtyard",
-    lifestyleFit: "Inner-city fringe with high walkability to shops, cafes & CBD transport",
-    planningRisk: "None flagged (No flood/bushfire overlays)",
-    keyCompromise: "3-storey layout with internal stairs (challenging for 14yo senior arthritic dog)",
-    inspectionTimes: "Today 5:00 pm",
-    quarterlyBodyCorp: 950,
-    monthlyBodyCorp: 316.67,
-    weeklyBodyCorp: 73,
-    imageUrl: "images/ashgrove-facade.png",
-    floorplanUrl: "",
-    images: [
-      "images/ashgrove-facade.png"
-    ],
-    distances: {
-      workEMP: "24 mins",
-      cityTransit: "15 mins bus (Route 385)",
-      shopsWalk: "5 mins walk (450m to Woolworths / Marketplace)",
-      callumKaitlin: "11 mins",
-      parentsEmma: "18 mins",
-      parentsJordan: "22 mins",
-      airport: "18 mins"
+    "id": "prop-waterworks-2-181",
+    "address": "2/181 Waterworks Road, Ashgrove, QLD 4060",
+    "suburb": "Ashgrove",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
+    "advertisedGuide": "Offers from $900,000",
+    "modelledPrice": 900000,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "parking": "2 car spaces (1 lockup garage + 1 open space)",
+    "parkingSpaces": 2,
+    "levels": 3,
+    "outdoorSpace": "Fenced easy-care courtyard & private covered balcony",
+    "standoutFeature": "City-fringe living 4.5km to CBD, 450m to Ashgrove Marketplace & Woolworths, very low body corp",
+    "lifestyleFit": "Emma's dream café & boutique lifestyle, ultra walkable to shops, express bus to CBD",
+    "planningRisk": "None flagged (No flood/bushfire overlays)",
+    "keyCompromise": "3-storey layout with internal stairs (challenging for 14yo senior arthritic dog)",
+    "inspectionTimes": "Today 5:00 pm",
+    "quarterlyBodyCorp": 950,
+    "monthlyBodyCorp": 316.67,
+    "weeklyBodyCorp": 73,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "24 mins",
+      "cityTransit": "15 mins bus (Route 385 express)",
+      "shopsWalk": "5 mins walk (450m to Woolworths / Ashgrove Marketplace)",
+      "callumKaitlin": "11 mins",
+      "parentsEmma": "18 mins",
+      "parentsJordan": "22 mins",
+      "airport": "18 mins"
     },
-    notes: "3-storey Ashgrove townhouse in boutique complex. Exceptional walkability (450m to Woolworths, cafes, medical). Enclosed courtyard for pets, ducted air con, low body corp (~$317/mo). Huge cashflow boost (+$2,499/mo). Compromise: 3-storey layout requires stair navigation for 14yo dog."
+    "notes": "3-bedroom boutique townhouse in prime Ashgrove pocket. 3 toilets, master ensuite with private balcony, ducted air-conditioning, dishwasher, single garage + open car space. Ground-level laundry opens to fully fenced easy-care courtyard. Ultra convenient: 450m walk to Ashgrove Marketplace & Woolworths, 600m to Coles, under 4.5km to CBD. Very low body corporate (~$73/wk). Note: 3 levels of stairs requires navigation for 14yo pet."
   },
   {
-    id: "prop-bunya-45-120",
-    address: "45/120 Bunya Road, Everton Hills, Qld 4053",
-    suburb: "Everton Hills",
-    link: "https://www.realestate.com.au/property-townhouse-qld-everton+hills-152742596",
-    advertisedGuide: "For Sale",
-    modelledPrice: 950000,
-    bedrooms: 4,
-    bathrooms: 2,
-    parking: "2 car garage",
-    parkingSpaces: 2,
-    levels: 2,
-    outdoorSpace: "Private courtyard",
-    standoutFeature: "4 bedrooms, second living area & private pet courtyard",
-    lifestyleFit: "Northside lifestyle (Jordan preferred)",
-    planningRisk: "None flagged",
-    keyCompromise: "Requires driving to shops (7m Brookside)",
-    inspectionTimes: "Sat 7 Nov 9:00 am",
-    quarterlyBodyCorp: 965,
-    monthlyBodyCorp: 321.67,
-    imageUrl: "https://i2.au.reastatic.net/1140x640-format=webp/2b5bcf889d5fc40e1b462e9ef182c33eeee68644bae8fae0c02384e9d0767666/image.jpg",
-    floorplanUrl: "https://i2.au.reastatic.net/1140x640-format=webp/24ce030c98a427e42ea1b7826ef3856132b132c695ee585a1bdf21d0f70962e1/image.png",
-    images: [
+    "id": "prop-old-northern-2-178",
+    "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
+    "suburb": "Everton Park",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-everton+park-146399120",
+    "advertisedGuide": "Offers From $799,000",
+    "modelledPrice": 800000,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "parking": "2 car secure remote garage",
+    "parkingSpaces": 2,
+    "levels": 2,
+    "outdoorSpace": "Private fully fenced courtyard",
+    "standoutFeature": "Generous 187m² build area with 2-car garage & fully fenced courtyard in Everton Park",
+    "lifestyleFit": "Northside lifestyle (Jordan preferred), 5 mins to Callum & Kaitlin, walk to Everton Plaza",
+    "planningRisk": "None flagged",
+    "keyCompromise": "Commute to Eight Mile Plains (~38 mins peak)",
+    "inspectionTimes": "Sat 7 Nov 10:00 am",
+    "quarterlyBodyCorp": 1100,
+    "monthlyBodyCorp": 366.67,
+    "weeklyBodyCorp": 85,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "38 mins",
+      "cityTransit": "28 mins express bus (Route 350 / 359)",
+      "shopsWalk": "2 mins drive / 800m to Everton Plaza & Woolworths",
+      "callumKaitlin": "5 mins (Extremely close)",
+      "parentsEmma": "20 mins",
+      "parentsJordan": "30 mins",
+      "airport": "22 mins (via Airport Link)"
+    },
+    "notes": "Contemporary 2-level townhouse built 2017 with large 187m² layout. 3 bedrooms with built-in robes, master with ensuite, 3 toilets, air conditioning, and study. Secure 2-car remote garage and private fully fenced courtyard for the 4 fur babies. 800m to Everton Plaza dining & Woolworths, and only 5 mins to Callum & Kaitlin. Incredible financial cashflow freeing up +$3,165/mo in mortgage payments."
+  },
+  {
+    "id": "prop-bunya-45-120",
+    "address": "45/120 Bunya Road, Everton Hills, Qld 4053",
+    "suburb": "Everton Hills",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-everton+hills-152742596",
+    "advertisedGuide": "For Sale",
+    "modelledPrice": 950000,
+    "bedrooms": 4,
+    "bathrooms": 2,
+    "parking": "2 car garage",
+    "parkingSpaces": 2,
+    "levels": 2,
+    "outdoorSpace": "Private courtyard",
+    "standoutFeature": "4 bedrooms, second living area & private pet courtyard",
+    "lifestyleFit": "Northside lifestyle (Jordan preferred)",
+    "planningRisk": "None flagged",
+    "keyCompromise": "Requires driving to shops (7m Brookside)",
+    "inspectionTimes": "Sat 7 Nov 9:00 am",
+    "quarterlyBodyCorp": 965,
+    "monthlyBodyCorp": 321.67,
+    "imageUrl": "https://i2.au.reastatic.net/1140x640-format=webp/2b5bcf889d5fc40e1b462e9ef182c33eeee68644bae8fae0c02384e9d0767666/image.jpg",
+    "floorplanUrl": "https://i2.au.reastatic.net/1140x640-format=webp/24ce030c98a427e42ea1b7826ef3856132b132c695ee585a1bdf21d0f70962e1/image.png",
+    "images": [
       "https://i2.au.reastatic.net/1140x640-format=webp/2b5bcf889d5fc40e1b462e9ef182c33eeee68644bae8fae0c02384e9d0767666/image.jpg",
       "https://i2.au.reastatic.net/1140x640-format=webp/24ce030c98a427e42ea1b7826ef3856132b132c695ee585a1bdf21d0f70962e1/image.png",
       "https://i2.au.reastatic.net/1140x640-format=webp/cac22c3f4ccd82998bf38441ce9d6b6d988781fd319e480c1cd16d63bd8d20d3/image.jpg",
       "https://i2.au.reastatic.net/1140x640-format=webp/bef95042f76b25ae2fd3571ad1e10d874f960d4fd6c13ab3544a386ffdc21975/image.jpg",
       "https://i2.au.reastatic.net/1140x640-format=webp/191cd98750625560cabebb793cebd84366b0769f29c1782b89ddf8d23dfd7041/image.jpg",
-      "https://i2.au.reastatic.net/1140x640-format=webp/f7f7bd6a97de3a3940a8fecd20517c728341b261746e6065717a022e19e76d48/image.jpg"
+      "https://i2.au.reastatic.net/1140x640-format=webp/f7f7bd6a97de3a3940a8fecd20517c728341b261746e6065717a022e19e76d48/image.jpg",
+      "https://i2.au.reastatic.net/1140x640-format=webp/ba7a06b5fd8b6a99ee6c62fb6f381f3952f439b7ccd979157eb97c7b00772fde/image.jpg"
     ],
-    distances: {
-      workEMP: "40 mins",
-      cityTransit: "35 mins train from Grovely",
-      shopsWalk: "7 mins drive to Brookside",
-      callumKaitlin: "5 mins (Extremely close)",
-      parentsEmma: "20 mins",
-      parentsJordan: "33 mins",
-      airport: "30 mins"
+    "distances": {
+      "workEMP": "40 mins",
+      "cityTransit": "35 mins train from Grovely",
+      "shopsWalk": "7 mins drive to Brookside",
+      "callumKaitlin": "5 mins (Extremely close)",
+      "parentsEmma": "20 mins",
+      "parentsJordan": "33 mins",
+      "airport": "30 mins"
     },
-    notes: "4 bedrooms, 2 levels with ground floor living and private courtyard. Ideal layout for senior 14yo dog. 5 mins to Callum & Kaitlin. Low body corporate ($322/mo). Saves $1,857/mo in mortgage payments."
-  },
-  {
-    id: "baringa-8-19",
-    address: "8/19 Baringa Street",
-    suburb: "Morningside",
-    link: "https://www.realestate.com.au/property/8-19-baringa-st-morningside-qld-4170",
-    advertisedGuide: "Offers over $1.04m",
-    modelledPrice: 1040000,
-    bedrooms: 3,
-    bathrooms: 2,
-    parking: "3 advertised tandem spaces",
-    parkingSpaces: 3,
-    levels: 3,
-    outdoorSpace: "Limited yard / balconies",
-    standoutFeature: "Large garage and storage",
-    lifestyleFit: "Preferred suburb (Emma)",
-    planningRisk: "Flood overlay flagged",
-    keyCompromise: "Tandem garage and three levels",
-    stampDuty: 33150,
-    otherExpenses: 4000,
-    quarterlyBodyCorp: 2000,
-    monthlyBodyCorp: 666.67,
-    inspectionTimes: "Sat 10:00 AM - 10:30 AM",
-    imageUrl: "",
-    images: [],
-    distances: {
-      workEMP: "22 mins",
-      cityTransit: "25 mins by train",
-      shopsWalk: "5 mins walk",
-      callumKaitlin: "35 mins",
-      parentsEmma: "15 mins",
-      parentsJordan: "40 mins",
-      airport: "15 mins"
-    },
-    notes: "Great storage capacity in Emma's preferred suburb. 3 levels and balconies are tough for the 14yo dog. High body corp ($667/mo) and flood overlay flagged."
-  },
-  {
-    id: "dickson-3-58",
-    address: "3/58 Dickson Street",
-    suburb: "Morningside",
-    link: "https://www.realestate.com.au/property/3-58-dickson-st-morningside-qld-4170",
-    advertisedGuide: "Inviting buyers $1m+",
-    modelledPrice: 920000,
-    bedrooms: 3,
-    bathrooms: 2,
-    parking: "Side-by-side double garage",
-    parkingSpaces: 2,
-    levels: 3,
-    outdoorSpace: "Balconies",
-    standoutFeature: "Double garage and location",
-    lifestyleFit: "Preferred suburb (Emma)",
-    planningRisk: "Overland flow flagged",
-    keyCompromise: "Stairs and limited outdoor space",
-    stampDuty: 29725,
-    otherExpenses: 4000,
-    quarterlyBodyCorp: 1200,
-    monthlyBodyCorp: 400,
-    inspectionTimes: "Sat 11:15 AM - 11:45 AM",
-    imageUrl: "",
-    images: [],
-    distances: {
-      workEMP: "20 mins",
-      cityTransit: "25 mins by train",
-      shopsWalk: "6 mins walk",
-      callumKaitlin: "36 mins",
-      parentsEmma: "16 mins",
-      parentsJordan: "42 mins",
-      airport: "15 mins"
-    },
-    notes: "Side-by-side double garage and excellent Morningside location with strong monthly mortgage savings of $1,956. 3 levels and balconies without courtyard."
-  },
-  {
-    id: "rogers-17-44",
-    address: "17/44 Rogers Parade West",
-    suburb: "Everton Park",
-    link: "https://www.realestate.com.au/property/17-44-rogers-pde-w-everton-park-qld-4053",
-    advertisedGuide: "Best offers by 10/11",
-    modelledPrice: 999000,
-    bedrooms: 4,
-    bathrooms: 2.5,
-    parking: "Side-by-side double garage",
-    parkingSpaces: 2,
-    levels: 2,
-    outdoorSpace: "Private courtyard",
-    standoutFeature: "Four bedrooms and private courtyard",
-    lifestyleFit: "Northside lifestyle (Jordan preferred)",
-    planningRisk: "None flagged",
-    keyCompromise: "Commute to Eight Mile Plains",
-    stampDuty: 31275,
-    otherExpenses: 4000,
-    quarterlyBodyCorp: 1146,
-    monthlyBodyCorp: 382,
-    inspectionTimes: "Sat 12:30 PM - 1:00 PM",
-    imageUrl: "",
-    images: [],
-    distances: {
-      workEMP: "38 mins",
-      cityTransit: "35 mins bus/train",
-      shopsWalk: "Drive required (Flockton/Brookside)",
-      callumKaitlin: "6 mins",
-      parentsEmma: "20 mins",
-      parentsJordan: "30 mins",
-      airport: "25 mins"
-    },
-    notes: "4 bedrooms gives Jordan the true home feel, 2 levels with courtyard is safe for 14yo dog. 6 mins to Callum & Kaitlin. Low body corporate ($382/mo) and $1,617/mo cash freed up."
-  },
-  {
-    id: "richmond-17-101",
-    address: "17/101 Richmond Road",
-    suburb: "Morningside",
-    link: "https://www.realestate.com.au/property/17-101-richmond-rd-morningside-qld-4170",
-    advertisedGuide: "Offers over $899k",
-    modelledPrice: 900000,
-    bedrooms: 3,
-    bathrooms: 2,
-    parking: "1 car garage",
-    parkingSpaces: 1,
-    levels: 2,
-    outdoorSpace: "Private courtyard",
-    standoutFeature: "Courtyard and Morningside location",
-    lifestyleFit: "Preferred suburb (Emma)",
-    planningRisk: "None flagged",
-    keyCompromise: "Only 1 car garage",
-    stampDuty: 26300,
-    otherExpenses: 4000,
-    quarterlyBodyCorp: 1269,
-    monthlyBodyCorp: 423,
-    inspectionTimes: "Sat 2:00 PM - 2:30 PM",
-    imageUrl: "",
-    images: [],
-    distances: {
-      workEMP: "21 mins",
-      cityTransit: "25 mins by train",
-      shopsWalk: "4 mins walk",
-      callumKaitlin: "35 mins",
-      parentsEmma: "14 mins",
-      parentsJordan: "41 mins",
-      airport: "15 mins"
-    },
-    notes: "Rare 2-level Morningside townhouse with private courtyard (great for 14yo dog). Unbeatable walkability for Emma. Biggest monthly cash freed up (+$2,072/mo). Compromise: 1 car garage."
+    "notes": "4 bedrooms, 2 levels with ground floor living and private courtyard. Ideal layout for senior 14yo dog. 5 mins to Callum & Kaitlin. Low body corporate ($322/mo). Saves $1,857/mo in mortgage payments.",
+    "weeklyBodyCorp": 74,
+    "propertyValue": 985000,
+    "propertyValueConfidence": "HIGH CONFIDENCE",
+    "propertyValueSource": "property.com.au"
   }
 ];
+const KNOWN_DELETED_IDS = [
+  'baringa-8-19', 'dickson-3-58', 'rogers-17-44', 'richmond-17-101',
+  'prop-1793691380686', 'prop-1793691499861', 'prop-1793694074546',
+  'prop-1793692691513', 'prop-1793692488780', 'prop-1793693976863'
+];
+const KNOWN_DELETED_ADDRS = [
+  '8/19 baringa', '3/58 dickson', '17/44 rogers', '17/101 richmond',
+  '11/906 hamilton', '13/906 hamilton', '6/41 pembroke', '5/84 kent',
+  '3/122 keona', '4/104 albert'
+];
+
 
 class PropertyHunterApp {
   constructor() {
@@ -659,6 +533,9 @@ class PropertyHunterApp {
     this.anchorCommuteMode = 'all'; // 'all', 'drive', 'transit', 'walk'
     this.editingAnchorAddressId = null;
     this.deletedPropertyIds = new Set(JSON.parse(localStorage.getItem('nestquest_deleted_properties') || '[]'));
+    KNOWN_DELETED_IDS.forEach(id => this.deletedPropertyIds.add(id));
+    this.deletedPropertyAddresses = new Set(JSON.parse(localStorage.getItem('nestquest_deleted_addresses') || '[]'));
+    KNOWN_DELETED_ADDRS.forEach(addr => this.deletedPropertyAddresses.add(addr));
     this.selectedSuburbs = new Set();
     this.filterBedrooms = 'all';
     this.filterMaxPrice = 'all';
@@ -669,6 +546,22 @@ class PropertyHunterApp {
     this.isApiAvailable = false;
 
     this.init();
+  }
+
+  isPropertyDeleted(p) {
+    if (!p) return false;
+    if (p.id && (this.deletedPropertyIds.has(p.id) || KNOWN_DELETED_IDS.includes(p.id))) return true;
+    const addr = (p.address || '').toLowerCase().trim();
+    if (addr) {
+      if (this.deletedPropertyAddresses.has(addr)) return true;
+      for (const d of this.deletedPropertyAddresses) {
+        if (d && (addr.includes(d) || d.includes(addr))) return true;
+      }
+      for (const kd of KNOWN_DELETED_ADDRS) {
+        if (addr.includes(kd)) return true;
+      }
+    }
+    return false;
   }
 
   async init() {
@@ -1261,26 +1154,30 @@ class PropertyHunterApp {
             let parsed = null;
             try { parsed = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
             if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-              this.properties = cloudProps.filter(p => !this.deletedPropertyIds.has(p.id));
+              this.properties = cloudProps.filter(p => !this.isPropertyDeleted(p));
               localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
             } else {
-              // Auto-merge new candidate properties from cloudProps not in localStorage
+              // Auto-merge new candidate properties from cloudProps not in localStorage and NOT deleted
               let cloudMerged = false;
+              // Clean existing parsed of any deleted listings first
+              const initialLen = parsed.length;
+              parsed = parsed.filter(p => !this.isPropertyDeleted(p));
+              if (parsed.length !== initialLen) cloudMerged = true;
+
               cloudProps.forEach(cp => {
-                if (!this.deletedPropertyIds.has(cp.id)) {
+                if (!this.isPropertyDeleted(cp)) {
                   const idx = parsed.findIndex(p => p.id === cp.id || (p.address && cp.address && p.address.toLowerCase().trim() === cp.address.toLowerCase().trim()));
                   if (idx === -1) {
                     parsed.unshift(cp);
                     cloudMerged = true;
                   } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178') {
-                    // Force update latest data
                     parsed[idx] = { ...parsed[idx], ...cp };
                     cloudMerged = true;
                   }
                 }
               });
+              this.properties = parsed.filter(p => !this.isPropertyDeleted(p));
               if (cloudMerged) {
-                this.properties = parsed.filter(p => !this.deletedPropertyIds.has(p.id));
                 localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
               }
             }
@@ -1318,8 +1215,13 @@ class PropertyHunterApp {
     try { parsedProps = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
     if (parsedProps && Array.isArray(parsedProps) && parsedProps.length > 0) {
       let localMerged = false;
+      // Strip any deleted properties immediately
+      const initialCount = parsedProps.length;
+      parsedProps = parsedProps.filter(p => !this.isPropertyDeleted(p));
+      if (parsedProps.length !== initialCount) localMerged = true;
+
       DEFAULT_PROPERTIES.forEach(dp => {
-        if (!this.deletedPropertyIds.has(dp.id)) {
+        if (!this.isPropertyDeleted(dp)) {
           const lidx = parsedProps.findIndex(p => p.id === dp.id || (p.address && dp.address && p.address.toLowerCase().trim() === dp.address.toLowerCase().trim()));
           if (lidx === -1) {
             parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
@@ -1330,12 +1232,12 @@ class PropertyHunterApp {
           }
         }
       });
-      this.properties = parsedProps.filter(p => !this.deletedPropertyIds.has(p.id));
+      this.properties = parsedProps.filter(p => !this.isPropertyDeleted(p));
       if (localMerged) {
         localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
       }
     } else if (!this.properties || this.properties.length === 0) {
-      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.deletedPropertyIds.has(p.id));
+      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.isPropertyDeleted(p));
     }
     
     // Auto-correct legacy duplicate $322 body corporate on non-Bunya properties from earlier bookmarklet sessions
@@ -3978,9 +3880,16 @@ class PropertyHunterApp {
     const addr = prop ? prop.address : 'this listing';
     if (!confirm(`Are you sure you want to remove "${addr}" from your Property Hub?`)) return;
 
-    // Permanently record deleted ID so it is never re-added from spreadsheet/defaults
+    // Permanently record deleted ID and address so it is NEVER re-added
     this.deletedPropertyIds.add(propId);
+    if (prop && prop.address) {
+      const cleanAddr = prop.address.toLowerCase().trim();
+      this.deletedPropertyAddresses.add(cleanAddr);
+      const street = cleanAddr.split(',')[0].trim();
+      if (street) this.deletedPropertyAddresses.add(street);
+    }
     localStorage.setItem('nestquest_deleted_properties', JSON.stringify(Array.from(this.deletedPropertyIds)));
+    localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(Array.from(this.deletedPropertyAddresses)));
 
     if (this.isApiAvailable) {
       try {
