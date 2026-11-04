@@ -492,8 +492,8 @@ const DEFAULT_PROPERTIES = [
     quarterlyBodyCorp: 2000,
     monthlyBodyCorp: 666.67,
     inspectionTimes: "Sat 10:00 AM - 10:30 AM",
-    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    images: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"],
+    imageUrl: "",
+    images: [],
     distances: {
       workEMP: "22 mins",
       cityTransit: "25 mins by train",
@@ -527,8 +527,8 @@ const DEFAULT_PROPERTIES = [
     quarterlyBodyCorp: 1200,
     monthlyBodyCorp: 400,
     inspectionTimes: "Sat 11:15 AM - 11:45 AM",
-    imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-    images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"],
+    imageUrl: "",
+    images: [],
     distances: {
       workEMP: "20 mins",
       cityTransit: "25 mins by train",
@@ -562,8 +562,8 @@ const DEFAULT_PROPERTIES = [
     quarterlyBodyCorp: 1146,
     monthlyBodyCorp: 382,
     inspectionTimes: "Sat 12:30 PM - 1:00 PM",
-    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-    images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"],
+    imageUrl: "",
+    images: [],
     distances: {
       workEMP: "38 mins",
       cityTransit: "35 mins bus/train",
@@ -597,8 +597,8 @@ const DEFAULT_PROPERTIES = [
     quarterlyBodyCorp: 1269,
     monthlyBodyCorp: 423,
     inspectionTimes: "Sat 2:00 PM - 2:30 PM",
-    imageUrl: "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=800&q=80",
-    images: ["https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=800&q=80"],
+    imageUrl: "",
+    images: [],
     distances: {
       workEMP: "21 mins",
       cityTransit: "25 mins by train",
@@ -623,6 +623,10 @@ class PropertyHunterApp {
     this.lifeAnchors = JSON.parse(localStorage.getItem('nestquest_life_anchors') || 'null') || DEFAULT_ANCHORS;
     this.anchorCommuteMode = 'all'; // 'all', 'drive', 'transit', 'walk'
     this.editingAnchorAddressId = null;
+    this.deletedPropertyIds = new Set(JSON.parse(localStorage.getItem('nestquest_deleted_properties') || '[]'));
+    this.selectedSuburbs = new Set();
+    this.filterBedrooms = 'all';
+    this.filterMaxPrice = 'all';
     this.filterSuburb = 'all';
     this.filterPetSafe = false;
     this.searchQuery = '';
@@ -711,6 +715,19 @@ class PropertyHunterApp {
         else if (p.monthlyBodyCorp) p.weeklyBodyCorp = Math.round(p.monthlyBodyCorp / 4.333);
         else p.weeklyBodyCorp = 92;
         modified = true;
+      }
+
+      // Strip out any Unsplash or irrelevant stock photos
+      if (p.imageUrl && p.imageUrl.includes('unsplash')) {
+        p.imageUrl = '';
+        modified = true;
+      }
+      if (p.images && Array.isArray(p.images)) {
+        const clean = p.images.filter(img => !img.includes('unsplash'));
+        if (clean.length !== p.images.length) {
+          p.images = clean;
+          modified = true;
+        }
       }
 
       // Sanitize any logo mistakenly assigned as property hero image
@@ -1182,7 +1199,10 @@ class PropertyHunterApp {
           fetch('/api/properties'),
           fetch('/api/finances')
         ]);
-        if (propsRes.ok) this.properties = await propsRes.json();
+        if (propsRes.ok) {
+          const apiProps = await propsRes.json();
+          this.properties = (Array.isArray(apiProps) ? apiProps : []).filter(p => !this.deletedPropertyIds.has(p.id));
+        }
         if (finRes.ok) {
           const finData = await finRes.json();
           this.finances = finData;
@@ -1206,8 +1226,8 @@ class PropertyHunterApp {
             let parsed = null;
             try { parsed = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
             if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-              this.properties = cloudProps;
-              localStorage.setItem('nestquest_properties', JSON.stringify(cloudProps));
+              this.properties = cloudProps.filter(p => !this.deletedPropertyIds.has(p.id));
+              localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
             }
           }
         }
@@ -1242,9 +1262,9 @@ class PropertyHunterApp {
     let parsedProps = null;
     try { parsedProps = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
     if (parsedProps && Array.isArray(parsedProps) && parsedProps.length > 0) {
-      this.properties = parsedProps;
+      this.properties = parsedProps.filter(p => !this.deletedPropertyIds.has(p.id));
     } else if (!this.properties || this.properties.length === 0) {
-      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES));
+      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.deletedPropertyIds.has(p.id));
     }
     
     // Auto-correct legacy duplicate $322 body corporate on non-Bunya properties from earlier bookmarklet sessions
@@ -1355,12 +1375,48 @@ class PropertyHunterApp {
       });
     });
 
-    // Suburb filter select button
-    const suburbSelect = document.getElementById('filter-suburb-select');
-    if (suburbSelect) {
-      suburbSelect.addEventListener('change', (e) => {
-        this.filterSuburb = e.target.value;
-        suburbSelect.classList.toggle('active', this.filterSuburb !== 'all');
+    // Suburb Multi-Select dropdown toggle button
+    const suburbToggleBtn = document.getElementById('btn-toggle-suburb-dropdown');
+    if (suburbToggleBtn) {
+      suburbToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleSuburbDropdown();
+      });
+    }
+
+    // Clear / Select All suburbs button
+    const clearSuburbsBtn = document.getElementById('btn-clear-suburbs');
+    if (clearSuburbsBtn) {
+      clearSuburbsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.clearSuburbs();
+      });
+    }
+
+    // Close suburb dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('suburb-filter-container');
+      if (container && !container.contains(e.target)) {
+        this.toggleSuburbDropdown(false);
+      }
+    });
+
+    // Bedroom Filter
+    const bedroomSelect = document.getElementById('filter-bedrooms');
+    if (bedroomSelect) {
+      bedroomSelect.addEventListener('change', (e) => {
+        this.filterBedrooms = e.target.value;
+        bedroomSelect.classList.toggle('active', this.filterBedrooms !== 'all');
+        this.renderProperties();
+      });
+    }
+
+    // Max Price Filter
+    const priceSelect = document.getElementById('filter-max-price');
+    if (priceSelect) {
+      priceSelect.addEventListener('change', (e) => {
+        this.filterMaxPrice = e.target.value;
+        priceSelect.classList.toggle('active', this.filterMaxPrice !== 'all');
         this.renderProperties();
       });
     }
@@ -1390,14 +1446,6 @@ class PropertyHunterApp {
       sortSelect.addEventListener('change', (e) => {
         this.sortBy = e.target.value;
         this.renderProperties();
-      });
-    }
-
-    // Floating Compare Button
-    const floatingCompareBtn = document.getElementById('btn-floating-compare');
-    if (floatingCompareBtn) {
-      floatingCompareBtn.addEventListener('click', () => {
-        this.switchTab('compare');
       });
     }
 
@@ -1570,10 +1618,27 @@ class PropertyHunterApp {
 
     let filtered = [...this.properties];
 
-    if (this.filterSuburb !== 'all') {
-      filtered = filtered.filter(p => p.suburb.toLowerCase().includes(this.filterSuburb.toLowerCase()));
+    // 1. Multi-suburb selection
+    if (this.selectedSuburbs && this.selectedSuburbs.size > 0) {
+      filtered = filtered.filter(p => {
+        const sub = (p.suburb || '').trim().toLowerCase();
+        return Array.from(this.selectedSuburbs).some(s => s.toLowerCase() === sub);
+      });
     }
 
+    // 2. Bedrooms filter
+    if (this.filterBedrooms && this.filterBedrooms !== 'all') {
+      const minBeds = parseInt(this.filterBedrooms, 10);
+      filtered = filtered.filter(p => (Number(p.bedrooms) || 0) >= minBeds);
+    }
+
+    // 3. Max Price filter
+    if (this.filterMaxPrice && this.filterMaxPrice !== 'all') {
+      const maxPrice = parseInt(this.filterMaxPrice, 10);
+      filtered = filtered.filter(p => (Number(p.modelledPrice) || 0) <= maxPrice);
+    }
+
+    // 4. Pet Safe filter
     if (this.filterPetSafe) {
       filtered = filtered.filter(p => {
         const outdoor = (p.outdoorSpace || '').toLowerCase();
@@ -1582,6 +1647,7 @@ class PropertyHunterApp {
       });
     }
 
+    // 5. Search query
     if (this.searchQuery) {
       filtered = filtered.filter(p => 
         (p.address || '').toLowerCase().includes(this.searchQuery) ||
@@ -1644,7 +1710,6 @@ class PropertyHunterApp {
 
   createPropertyCardHtml(p) {
     const scores = p.aiScores || { overallFit: 70, emmaScore: 70, jordanScore: 70, furBabiesScore: 70 };
-    const isChecked = this.selectedForCompare.has(p.id);
     const isPlanned = this.plannedInspections.has(p.id);
 
     const getScoreColorClass = (score) => {
@@ -1653,21 +1718,56 @@ class PropertyHunterApp {
       return 'score-low';
     };
 
+    const hasRealPhoto = Boolean(p.imageUrl && !p.imageUrl.includes('unsplash'));
+
     return `
       <div class="property-card" data-id="${p.id}">
-        <div class="card-hero-image">
-          <img src="${p.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'}" alt="${p.address}" loading="lazy">
-          <div class="image-badges">
-            <div style="display: flex; gap: 6px; align-items: center;">
-              <span class="badge-suburb">${p.suburb}</span>
-              ${p.floorplanUrl ? `<span class="badge-suburb" style="background: rgba(37, 99, 235, 0.9); font-size: 11px;">📐 Floorplan</span>` : ''}
+        ${hasRealPhoto ? `
+          <div class="card-hero-image">
+            <img src="${p.imageUrl}" alt="${p.address}" loading="lazy">
+            <label class="card-photo-btn" onclick="event.stopPropagation();" title="Change photo">
+              <input type="file" accept="image/*" style="display: none;" onchange="app.handleCardPhotoUpload('${p.id}', this.files[0])">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span>Change</span>
+            </label>
+            <div class="image-badges">
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="badge-suburb">${p.suburb}</span>
+                ${p.floorplanUrl ? `<span class="badge-suburb" style="background: rgba(37, 99, 235, 0.9); font-size: 11px;">📐 Floorplan</span>` : ''}
+              </div>
+              <span class="badge-saving">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                Save $${Math.round(p.monthlySaving || 0).toLocaleString()}/mo
+              </span>
             </div>
-            <span class="badge-saving">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-              Save $${Math.round(p.monthlySaving || 0).toLocaleString()}/mo
-            </span>
           </div>
-        </div>
+        ` : `
+          <div class="card-hero-image card-hero-placeholder">
+            <div class="placeholder-graphic">
+              <div class="placeholder-icon-circle">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </div>
+              <label class="card-upload-cta" onclick="event.stopPropagation();">
+                <input type="file" accept="image/*" style="display: none;" onchange="app.handleCardPhotoUpload('${p.id}', this.files[0])">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                + Upload Photo
+              </label>
+            </div>
+            <div class="image-badges">
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="badge-suburb">${p.suburb}</span>
+                ${p.floorplanUrl ? `<span class="badge-suburb" style="background: rgba(37, 99, 235, 0.9); font-size: 11px;">📐 Floorplan</span>` : ''}
+              </div>
+              <span class="badge-saving">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                Save $${Math.round(p.monthlySaving || 0).toLocaleString()}/mo
+              </span>
+            </div>
+          </div>
+        `}
 
         <div class="card-content">
           <div class="card-header-row">
@@ -1790,13 +1890,17 @@ class PropertyHunterApp {
             </div>
           ` : ''}
 
-          <!-- Footer with Compare Checkbox and Deep Dive -->
-          <div class="card-footer">
-            <label class="compare-checkbox-label">
-              <input type="checkbox" class="compare-card-cb" data-id="${p.id}" ${isChecked ? 'checked' : ''}>
-              <span>Select to Compare</span>
-            </label>
-            <button class="btn-secondary" style="padding: 6px 14px; font-size: 13px;" onclick="app.openDetailDrawer('${p.id}')">
+          <!-- Footer with Delete Bin Button and View Breakdown Button -->
+          <div class="card-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+            <button class="btn-card-delete" onclick="event.stopPropagation(); app.deleteProperty('${p.id}')" title="Delete listing from portfolio" aria-label="Delete listing">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
+            <button class="btn-primary" style="padding: 7px 16px; font-size: 13px;" onclick="app.openDetailDrawer('${p.id}')">
               View Breakdown
             </button>
           </div>
@@ -1846,62 +1950,113 @@ class PropertyHunterApp {
     }
   }
 
+  toggleSuburbDropdown(show) {
+    const dropdown = document.getElementById('suburb-dropdown-menu');
+    const btn = document.getElementById('btn-toggle-suburb-dropdown');
+    if (!dropdown) return;
+    const isShowing = dropdown.style.display !== 'none';
+    const nextState = (typeof show === 'boolean') ? show : !isShowing;
+    dropdown.style.display = nextState ? 'block' : 'none';
+    if (btn) btn.setAttribute('aria-expanded', nextState ? 'true' : 'false');
+  }
+
   updateSuburbFilterOptions() {
-    const select = document.getElementById('filter-suburb-select');
-    if (!select) return;
+    const list = document.getElementById('suburb-checkbox-list');
+    const summary = document.getElementById('suburb-filter-summary');
+    const btn = document.getElementById('btn-toggle-suburb-dropdown');
+    if (!list) return;
 
     const suburbCounts = {};
     (this.properties || []).forEach(p => {
       const s = (p.suburb || '').trim();
-      if (s) {
-        suburbCounts[s] = (suburbCounts[s] || 0) + 1;
-      }
+      if (s) suburbCounts[s] = (suburbCounts[s] || 0) + 1;
     });
 
     const suburbs = Object.keys(suburbCounts).sort();
 
+    // Clean up selectedSuburbs to only retain suburbs with active properties
+    for (const sub of this.selectedSuburbs) {
+      if (!suburbCounts[sub]) this.selectedSuburbs.delete(sub);
+    }
+
     if (suburbs.length === 0) {
-      select.innerHTML = '<option value="all">📍 Suburb: No properties</option>';
-      select.disabled = true;
-      select.classList.remove('active');
+      list.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 12.5px; text-align: center;">No properties loaded</div>';
+      if (summary) summary.textContent = 'None';
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.remove('active');
+      }
       return;
     }
 
-    select.disabled = false;
-    let html = `<option value="all" ${this.filterSuburb === 'all' ? 'selected' : ''}>📍 Suburb: All Suburbs (${this.properties.length})</option>`;
-    suburbs.forEach(sub => {
-      const isSel = this.filterSuburb.toLowerCase() === sub.toLowerCase();
-      html += `<option value="${sub}" ${isSel ? 'selected' : ''}>📍 Suburb: ${sub} (${suburbCounts[sub]})</option>`;
-    });
+    if (btn) btn.disabled = false;
 
-    select.innerHTML = html;
-    select.classList.toggle('active', this.filterSuburb !== 'all');
+    // Update summary badge
+    if (summary) {
+      if (this.selectedSuburbs.size === 0 || this.selectedSuburbs.size === suburbs.length) {
+        summary.textContent = `All (${this.properties.length})`;
+        if (btn) btn.classList.remove('active');
+      } else if (this.selectedSuburbs.size === 1) {
+        summary.textContent = Array.from(this.selectedSuburbs)[0];
+        if (btn) btn.classList.add('active');
+      } else {
+        summary.textContent = `${this.selectedSuburbs.size} selected`;
+        if (btn) btn.classList.add('active');
+      }
+    }
+
+    list.innerHTML = suburbs.map(sub => {
+      const isChecked = this.selectedSuburbs.has(sub);
+      return `
+        <label class="suburb-cb-item">
+          <input type="checkbox" value="${sub}" ${isChecked ? 'checked' : ''} onchange="app.handleSuburbToggle('${sub}', this.checked)">
+          <span class="suburb-cb-name">${sub}</span>
+          <span class="suburb-cb-count">(${suburbCounts[sub]})</span>
+        </label>
+      `;
+    }).join('');
+  }
+
+  handleSuburbToggle(suburb, checked) {
+    if (checked) {
+      this.selectedSuburbs.add(suburb);
+    } else {
+      this.selectedSuburbs.delete(suburb);
+    }
+    this.updateSuburbFilterOptions();
+    this.renderProperties();
+  }
+
+  clearSuburbs() {
+    this.selectedSuburbs.clear();
+    this.updateSuburbFilterOptions();
+    this.renderProperties();
   }
 
   resetFilters() {
-    this.filterSuburb = 'all';
+    this.selectedSuburbs.clear();
+    this.filterBedrooms = 'all';
+    this.filterMaxPrice = 'all';
     this.filterPetSafe = false;
     this.searchQuery = '';
-    if (!this.properties || this.properties.length === 0) {
-      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES));
-      this.saveDataLocally();
-      this.recalculateAllMetrics();
-    }
-    const suburbSelect = document.getElementById('filter-suburb-select');
-    if (suburbSelect) {
-      suburbSelect.value = 'all';
-      suburbSelect.classList.remove('active');
-    }
+
+    const bedEl = document.getElementById('filter-bedrooms');
+    if (bedEl) { bedEl.value = 'all'; bedEl.classList.remove('active'); }
+    const priceEl = document.getElementById('filter-max-price');
+    if (priceEl) { priceEl.value = 'all'; priceEl.classList.remove('active'); }
     const petBtn = document.getElementById('filter-pets');
     if (petBtn) petBtn.classList.remove('active');
     const searchInput = document.getElementById('property-search');
     if (searchInput) searchInput.value = '';
+
     this.updateSuburbFilterOptions();
-    this.renderHeaderStats();
     this.renderProperties();
   }
 
   async restoreDefaultProperties() {
+    if (!confirm('Restore default candidate properties to your Property Hub?')) return;
+    this.deletedPropertyIds.clear();
+    localStorage.removeItem('nestquest_deleted_properties');
     try {
       const res = await fetch('data/properties.json');
       if (res.ok) {
@@ -1912,11 +2067,13 @@ class PropertyHunterApp {
     } catch(e) {
       this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES));
     }
+    this.migrateAndCleanProperties();
     this.saveDataLocally();
     this.recalculateAllMetrics();
+    this.updateSuburbFilterOptions();
     this.renderHeaderStats();
     this.renderProperties();
-    alert('✅ Restored all 11 properties with photos and valuations to your Property Hub!');
+    alert('✅ Restored candidate properties to your Property Hub!');
   }
 
   updateFloatingCompareBar() {
@@ -3290,12 +3447,18 @@ class PropertyHunterApp {
       <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
         <!-- Hero Image Box with Facade / Floorplan Switcher -->
         <div style="width: 290px; position: relative; flex-shrink: 0;">
-          <img id="drawer-hero-img" src="${p.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'}" style="width: 100%; height: 185px; object-fit: contain; background: #FAF7F2; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);" alt="${p.address}">
+          <img id="drawer-hero-img" src="${(p.imageUrl && !p.imageUrl.includes('unsplash')) ? p.imageUrl : 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22290%22 height=%22185%22 viewBox=%220 0 290 185%22><rect width=%22290%22 height=%22185%22 fill=%22%23EDE6DC%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2232%22>🏡</text></svg>'}" style="width: 100%; height: 185px; object-fit: contain; background: #FAF7F2; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);" alt="${p.address}">
           
-          <div style="display: flex; gap: 6px; margin-top: 8px;">
-            <button type="button" class="filter-pill active" id="btn-show-facade" style="flex: 1; padding: 6px; font-size: 12px; text-align: center;" onclick="document.getElementById('drawer-hero-img').src='${p.imageUrl}'; this.classList.add('active'); document.getElementById('btn-show-floorplan')?.classList.remove('active');">
-              🏡 Facade
-            </button>
+          <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+            ${(p.imageUrl && !p.imageUrl.includes('unsplash')) ? `
+              <button type="button" class="filter-pill active" id="btn-show-facade" style="flex: 1; padding: 6px; font-size: 12px; text-align: center;" onclick="document.getElementById('drawer-hero-img').src='${p.imageUrl}'; this.classList.add('active'); document.getElementById('btn-show-floorplan')?.classList.remove('active');">
+                🏡 Facade
+              </button>
+            ` : ''}
+            <label class="filter-pill" style="flex: 1; padding: 6px; font-size: 12px; text-align: center; cursor: pointer; color: var(--terracotta); border-color: var(--terracotta);">
+              <input type="file" accept="image/*" style="display:none;" onchange="app.handleCardPhotoUpload('${p.id}', this.files[0]); setTimeout(() => app.openDetailDrawer('${p.id}'), 300);">
+              📷 ${(p.imageUrl && !p.imageUrl.includes('unsplash')) ? 'Change' : '+ Add Photo'}
+            </label>
             ${p.floorplanUrl ? `
               <button type="button" class="filter-pill" id="btn-show-floorplan" style="flex: 1; padding: 6px; font-size: 12px; text-align: center; color: #2563EB; border-color: #BFDBFE;" onclick="document.getElementById('drawer-hero-img').src='${p.floorplanUrl}'; this.classList.add('active'); document.getElementById('btn-show-facade')?.classList.remove('active');">
                 📐 Floor Plan
@@ -3737,7 +3900,13 @@ class PropertyHunterApp {
   }
 
   async deleteProperty(propId) {
-    if (!confirm('Are you sure you want to remove this property?')) return;
+    const prop = this.properties.find(p => p.id === propId);
+    const addr = prop ? prop.address : 'this listing';
+    if (!confirm(`Are you sure you want to remove "${addr}" from your Property Hub?`)) return;
+
+    // Permanently record deleted ID so it is never re-added from spreadsheet/defaults
+    this.deletedPropertyIds.add(propId);
+    localStorage.setItem('nestquest_deleted_properties', JSON.stringify(Array.from(this.deletedPropertyIds)));
 
     if (this.isApiAvailable) {
       try {
@@ -3754,9 +3923,54 @@ class PropertyHunterApp {
     this.saveDataLocally();
     this.updateInspectionCountBadge();
 
-    document.getElementById('detail-drawer-modal').classList.remove('open');
+    const drawer = document.getElementById('detail-drawer-modal');
+    if (drawer) drawer.classList.remove('open');
     this.renderHeaderStats();
-    this.renderCurrentView();
+    this.updateSuburbFilterOptions();
+    this.renderProperties();
+    if (this.activeTab === 'finances') this.renderFinancialSimulator();
+  }
+
+  handleCardPhotoUpload(propId, file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1280;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+        const prop = this.properties.find(p => p.id === propId);
+        if (prop) {
+          prop.imageUrl = compressedDataUrl;
+          if (!prop.images || !Array.isArray(prop.images)) prop.images = [];
+          prop.images.unshift(compressedDataUrl);
+          this.saveDataLocally();
+          this.renderProperties();
+          if (this.isApiAvailable) {
+            this.syncPropertyToBackend(prop);
+          }
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   // =============================================================
