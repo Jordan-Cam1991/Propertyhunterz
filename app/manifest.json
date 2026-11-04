@@ -1,0 +1,35 @@
+{
+  "name": "NestQuest AI — Emma & Jordan's Property Suite",
+  "short_name": "NestQuest",
+  "description": "Emma & Jordan's Sale & Purchase Decision Sanctuary",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAF7F2",
+  "theme_color": "#FAF7F2",
+  "icons": [
+    {
+      "src": "images/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
