@@ -1268,9 +1268,13 @@ class PropertyHunterApp {
               let cloudMerged = false;
               cloudProps.forEach(cp => {
                 if (!this.deletedPropertyIds.has(cp.id)) {
-                  const exists = parsed.some(p => p.id === cp.id || (p.address && cp.address && p.address.toLowerCase().trim() === cp.address.toLowerCase().trim()));
-                  if (!exists) {
+                  const idx = parsed.findIndex(p => p.id === cp.id || (p.address && cp.address && p.address.toLowerCase().trim() === cp.address.toLowerCase().trim()));
+                  if (idx === -1) {
                     parsed.unshift(cp);
+                    cloudMerged = true;
+                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178') {
+                    // Force update latest data
+                    parsed[idx] = { ...parsed[idx], ...cp };
                     cloudMerged = true;
                   }
                 }
@@ -1316,9 +1320,12 @@ class PropertyHunterApp {
       let localMerged = false;
       DEFAULT_PROPERTIES.forEach(dp => {
         if (!this.deletedPropertyIds.has(dp.id)) {
-          const exists = parsedProps.some(p => p.id === dp.id || (p.address && dp.address && p.address.toLowerCase().trim() === dp.address.toLowerCase().trim()));
-          if (!exists) {
+          const lidx = parsedProps.findIndex(p => p.id === dp.id || (p.address && dp.address && p.address.toLowerCase().trim() === dp.address.toLowerCase().trim()));
+          if (lidx === -1) {
             parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
+            localMerged = true;
+          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178') {
+            parsedProps[lidx] = { ...parsedProps[lidx], ...JSON.parse(JSON.stringify(dp)) };
             localMerged = true;
           }
         }

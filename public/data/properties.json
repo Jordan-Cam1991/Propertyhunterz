@@ -1,5 +1,40 @@
 [
   {
+    "id": "prop-waterworks-2-181",
+    "address": "2/181 Waterworks Road, Ashgrove, QLD 4060",
+    "suburb": "Ashgrove",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
+    "advertisedGuide": "Offers from $900,000",
+    "modelledPrice": 900000,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "parking": "2 car spaces (1 lockup garage + 1 open space)",
+    "parkingSpaces": 2,
+    "levels": 3,
+    "outdoorSpace": "Fenced easy-care courtyard & private covered balcony",
+    "standoutFeature": "City-fringe living 4.5km to CBD, 450m to Ashgrove Marketplace & Woolworths, very low body corp",
+    "lifestyleFit": "Emma's dream café & boutique lifestyle, ultra walkable to shops, express bus to CBD",
+    "planningRisk": "None flagged (No flood/bushfire overlays)",
+    "keyCompromise": "3-storey layout with internal stairs (challenging for 14yo senior arthritic dog)",
+    "inspectionTimes": "Today 5:00 pm",
+    "quarterlyBodyCorp": 950,
+    "monthlyBodyCorp": 316.67,
+    "weeklyBodyCorp": 73,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "24 mins",
+      "cityTransit": "15 mins bus (Route 385 express)",
+      "shopsWalk": "5 mins walk (450m to Woolworths / Ashgrove Marketplace)",
+      "callumKaitlin": "11 mins",
+      "parentsEmma": "18 mins",
+      "parentsJordan": "22 mins",
+      "airport": "18 mins"
+    },
+    "notes": "3-bedroom boutique townhouse in prime Ashgrove pocket. 3 toilets, master ensuite with private balcony, ducted air-conditioning, dishwasher, single garage + open car space. Ground-level laundry opens to fully fenced easy-care courtyard. Ultra convenient: 450m walk to Ashgrove Marketplace & Woolworths, 600m to Coles, under 4.5km to CBD. Very low body corporate (~$73/wk). Note: 3 levels of stairs requires navigation for 14yo pet."
+  },
+  {
     "id": "prop-old-northern-2-178",
     "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
     "suburb": "Everton Park",
@@ -33,43 +68,6 @@
       "airport": "22 mins (via Airport Link)"
     },
     "notes": "Contemporary 2-level townhouse built 2017 with large 187m² layout. 3 bedrooms with built-in robes, master with ensuite, 3 toilets, air conditioning, and study. Secure 2-car remote garage and private fully fenced courtyard for the 4 fur babies. 800m to Everton Plaza dining & Woolworths, and only 5 mins to Callum & Kaitlin. Incredible financial cashflow freeing up +$3,165/mo in mortgage payments."
-  },
-  {
-    "id": "prop-waterworks-2-181",
-    "address": "2/181 Waterworks Road, Ashgrove, Qld 4060",
-    "suburb": "Ashgrove",
-    "link": "https://www.realestate.com.au/property-townhouse-qld-ashgrove-147814884",
-    "advertisedGuide": "Offers from $900,000",
-    "modelledPrice": 900000,
-    "bedrooms": 3,
-    "bathrooms": 2,
-    "parking": "2 car parking (1 lockup garage + 1 open space)",
-    "parkingSpaces": 2,
-    "levels": 3,
-    "outdoorSpace": "Enclosed rear courtyard & covered balcony",
-    "standoutFeature": "City-fringe living 4.5km to CBD, 450m walk to Woolworths / Ashgrove Marketplace, courtyard",
-    "lifestyleFit": "Inner-city fringe with high walkability to shops, cafes & CBD transport",
-    "planningRisk": "None flagged (No flood/bushfire overlays)",
-    "keyCompromise": "3-storey layout with internal stairs (challenging for 14yo senior arthritic dog)",
-    "inspectionTimes": "Today 5:00 pm",
-    "quarterlyBodyCorp": 950,
-    "monthlyBodyCorp": 316.67,
-    "weeklyBodyCorp": 73,
-    "imageUrl": "images/ashgrove-facade.png",
-    "floorplanUrl": "",
-    "images": [
-      "images/ashgrove-facade.png"
-    ],
-    "distances": {
-      "workEMP": "24 mins",
-      "cityTransit": "15 mins bus (Route 385)",
-      "shopsWalk": "5 mins walk (450m to Woolworths / Marketplace)",
-      "callumKaitlin": "11 mins",
-      "parentsEmma": "18 mins",
-      "parentsJordan": "22 mins",
-      "airport": "18 mins"
-    },
-    "notes": "3-storey Ashgrove townhouse in boutique complex. Exceptional walkability (450m to Woolworths, cafes, medical). Enclosed courtyard for pets, ducted air con, low body corp (~$317/mo). Huge cashflow boost (+$2,499/mo). Compromise: 3-storey layout requires stair navigation for 14yo dog."
   },
   {
     "id": "prop-bunya-45-120",
