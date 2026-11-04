@@ -34,9 +34,11 @@
           </div>
         </div>
 
-        <button class="btn-primary" id="btn-open-add-modal" style="display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          + Add Property
+        <button class="btn-add-property-corner" id="btn-open-add-modal" title="Add Property" aria-label="Add Property">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </button>
       </div>
     </header>
@@ -83,10 +85,9 @@
         <div class="filter-primary-row">
           <!-- Suburb Multi-Select Button & Popover -->
           <div class="suburb-filter-container" id="suburb-filter-container">
-            <button type="button" class="filter-pill filter-dropdown-btn" id="btn-toggle-suburb-dropdown" aria-expanded="false">
-              <span>📍 Suburbs:</span>
-              <span id="suburb-filter-summary" class="filter-badge">All</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            <button type="button" class="filter-control filter-dropdown-btn" id="btn-toggle-suburb-dropdown" aria-expanded="false">
+              <span>📍 Suburbs: <strong id="suburb-filter-summary">All</strong></span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="suburb-dropdown-menu" id="suburb-dropdown-menu" style="display: none;">
               <div class="suburb-dropdown-header">
@@ -100,16 +101,16 @@
           </div>
 
           <!-- Bedroom Filter -->
-          <select id="filter-bedrooms" class="filter-select-pill">
-            <option value="all">🛏️ Beds: Any</option>
+          <select id="filter-bedrooms" class="filter-control filter-control-select">
+            <option value="all" selected>🛏️ Beds: Any</option>
             <option value="2">🛏️ 2+ Beds</option>
             <option value="3">🛏️ 3+ Beds</option>
             <option value="4">🛏️ 4+ Beds</option>
           </select>
 
           <!-- Price Filter -->
-          <select id="filter-max-price" class="filter-select-pill">
-            <option value="all">💰 Max Price: Any</option>
+          <select id="filter-max-price" class="filter-control filter-control-select">
+            <option value="all" selected>💰 Price: Any</option>
             <option value="850000">💰 Under $850k</option>
             <option value="900000">💰 Under $900k</option>
             <option value="950000">💰 Under $950k</option>
@@ -117,11 +118,6 @@
             <option value="1050000">💰 Under $1.05M</option>
             <option value="1100000">💰 Under $1.1M</option>
           </select>
-
-          <!-- Pet Friendly Filter -->
-          <button class="filter-pill" id="filter-pets" style="display: inline-flex; align-items: center; gap: 5px;">
-            🐾 Pet Safe (Courtyard & ≤2 Levels)
-          </button>
         </div>
 
         <div class="filter-secondary-row">
@@ -132,7 +128,7 @@
 
           <div style="display: flex; align-items: center; gap: 6px;">
             <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Sort:</span>
-            <select id="sort-select" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-size: 13px; font-family: var(--font-sans); background: white;">
+            <select id="sort-select" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-size: 13.5px; font-family: var(--font-sans); background: white; color: #23201E !important; -webkit-text-fill-color: #23201E !important; font-weight: 600;">
               <option value="overall">Highest AI Fit</option>
               <option value="emma">Emma Match %</option>
               <option value="jordan">Jordan Match %</option>

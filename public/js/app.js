@@ -1421,15 +1421,7 @@ class PropertyHunterApp {
       });
     }
 
-    // Pet Safe filter pill
-    const petFilterBtn = document.getElementById('filter-pets');
-    if (petFilterBtn) {
-      petFilterBtn.addEventListener('click', () => {
-        this.filterPetSafe = !this.filterPetSafe;
-        petFilterBtn.classList.toggle('active', this.filterPetSafe);
-        this.renderProperties();
-      });
-    }
+
 
     // Search bar
     const searchInput = document.getElementById('property-search');
@@ -1638,14 +1630,7 @@ class PropertyHunterApp {
       filtered = filtered.filter(p => (Number(p.modelledPrice) || 0) <= maxPrice);
     }
 
-    // 4. Pet Safe filter
-    if (this.filterPetSafe) {
-      filtered = filtered.filter(p => {
-        const outdoor = (p.outdoorSpace || '').toLowerCase();
-        const levels = Number(p.levels) || 2;
-        return (outdoor.includes('courtyard') || outdoor.includes('yard')) && levels <= 2;
-      });
-    }
+
 
     // 5. Search query
     if (this.searchQuery) {
@@ -1711,6 +1696,7 @@ class PropertyHunterApp {
   createPropertyCardHtml(p) {
     const scores = p.aiScores || { overallFit: 70, emmaScore: 70, jordanScore: 70, furBabiesScore: 70 };
     const isPlanned = this.plannedInspections.has(p.id);
+    const isCompared = this.selectedForCompare.has(p.id);
 
     const getScoreColorClass = (score) => {
       if (score >= 80) return 'score-high';
@@ -1890,9 +1876,13 @@ class PropertyHunterApp {
             </div>
           ` : ''}
 
-          <!-- Footer with Delete Bin Button and View Breakdown Button -->
-          <div class="card-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
-            <button class="btn-card-delete" onclick="event.stopPropagation(); app.deleteProperty('${p.id}')" title="Delete listing from portfolio" aria-label="Delete listing">
+          <!-- Footer: Compare, Recycle Bin, View Breakdown (Centered along bottom) -->
+          <div class="card-footer">
+            <button type="button" class="btn-card-compare ${isCompared ? 'active' : ''}" onclick="app.toggleCompare('${p.id}', event)" title="Select to compare">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>${isCompared ? '✓ Comparing' : 'Compare'}</span>
+            </button>
+            <button type="button" class="btn-card-delete" onclick="event.stopPropagation(); app.deleteProperty('${p.id}')" title="Delete listing" aria-label="Delete listing">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -1900,7 +1890,7 @@ class PropertyHunterApp {
                 <line x1="14" y1="11" x2="14" y2="17"></line>
               </svg>
             </button>
-            <button class="btn-primary" style="padding: 7px 16px; font-size: 13px;" onclick="app.openDetailDrawer('${p.id}')">
+            <button type="button" class="btn-primary btn-card-breakdown" onclick="app.openDetailDrawer('${p.id}')">
               View Breakdown
             </button>
           </div>
@@ -2044,8 +2034,6 @@ class PropertyHunterApp {
     if (bedEl) { bedEl.value = 'all'; bedEl.classList.remove('active'); }
     const priceEl = document.getElementById('filter-max-price');
     if (priceEl) { priceEl.value = 'all'; priceEl.classList.remove('active'); }
-    const petBtn = document.getElementById('filter-pets');
-    if (petBtn) petBtn.classList.remove('active');
     const searchInput = document.getElementById('property-search');
     if (searchInput) searchInput.value = '';
 
@@ -3897,6 +3885,21 @@ class PropertyHunterApp {
     imgEl.src = imgUrl;
     if (titleEl) titleEl.textContent = `Architectural Floor Plan — ${address}`;
     modal.classList.add('open');
+  }
+
+  toggleCompare(propId, event) {
+    if (event) event.stopPropagation();
+    if (this.selectedForCompare.has(propId)) {
+      this.selectedForCompare.delete(propId);
+    } else {
+      this.selectedForCompare.add(propId);
+      if (this.selectedForCompare.size >= 2) {
+        // Automatically switch to comparison view when 2 properties are selected!
+        this.switchTab('compare');
+        return;
+      }
+    }
+    this.renderProperties();
   }
 
   async deleteProperty(propId) {
