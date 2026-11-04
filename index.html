@@ -46,12 +46,9 @@
           <div class="quick-stat-chip">
             <span>🐾 <strong>4 Fur Babies</strong></span>
           </div>
-          <button class="btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" onclick="app.openMobileConnectModal()">
-            📱 Phone App
-          </button>
-          <button class="btn-primary" id="btn-open-add-modal">
+          <button class="btn-primary" id="btn-open-add-modal" style="display: inline-flex; align-items: center; gap: 6px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Property
+            + Add Property
           </button>
         </div>
       </div>
@@ -96,15 +93,10 @@
     <section id="view-properties" class="tab-view">
       <!-- Toolbar Filters -->
       <div class="filter-toolbar">
-        <div class="filter-group">
-          <span style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">Suburb:</span>
-          <button class="filter-pill active" data-suburb="all">All Suburbs</button>
-          <button class="filter-pill" data-suburb="Ashgrove">Ashgrove</button>
-          <button class="filter-pill" data-suburb="Everton Hills">Everton Hills</button>
-          <button class="filter-pill" data-suburb="Everton Park">Everton Park</button>
-          <button class="filter-pill" data-suburb="Morningside">Morningside</button>
-          <button class="filter-pill" data-suburb="McDowall">McDowall</button>
-          <button class="filter-pill" data-suburb="Camp Hill">Camp Hill</button>
+        <div class="filter-group" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <select id="filter-suburb-select" class="filter-select-pill">
+            <option value="all">📍 Suburb: All Suburbs</option>
+          </select>
           <button class="filter-pill" id="filter-pets" style="display: inline-flex; align-items: center; gap: 5px;">
             🐾 Pet Safe (Courtyard & ≤2 Levels)
           </button>

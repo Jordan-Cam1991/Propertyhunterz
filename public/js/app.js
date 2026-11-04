@@ -1355,15 +1355,15 @@ class PropertyHunterApp {
       });
     });
 
-    // Suburb filter pills
-    document.querySelectorAll('.filter-pill[data-suburb]').forEach(pill => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('.filter-pill[data-suburb]').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        this.filterSuburb = pill.dataset.suburb;
+    // Suburb filter select button
+    const suburbSelect = document.getElementById('filter-suburb-select');
+    if (suburbSelect) {
+      suburbSelect.addEventListener('change', (e) => {
+        this.filterSuburb = e.target.value;
+        suburbSelect.classList.toggle('active', this.filterSuburb !== 'all');
         this.renderProperties();
       });
-    });
+    }
 
     // Pet Safe filter pill
     const petFilterBtn = document.getElementById('filter-pets');
@@ -1511,13 +1511,22 @@ class PropertyHunterApp {
   renderHeaderStats() {
     const sale = this.finances.sale;
     const equity = Calculator.calculateSaleEquity(sale.estimatedSalePrice, sale.existingMortgage, sale.sellingExpenses);
-    const maxSaving = Math.max(...this.properties.map(p => p.monthlySaving || 0));
+    const validSavings = (this.properties || []).map(p => Number(p.monthlySaving) || 0).filter(s => s > 0);
+    const maxSaving = validSavings.length > 0 ? Math.max(...validSavings) : 0;
 
     const statEquity = document.getElementById('stat-net-equity');
     if (statEquity) statEquity.textContent = `$${Math.round(equity).toLocaleString()}`;
 
     const statSavings = document.getElementById('stat-max-savings');
-    if (statSavings) statSavings.textContent = `+$${Math.round(maxSaving).toLocaleString()}/mo`;
+    if (statSavings) {
+      if (maxSaving > 0) {
+        statSavings.textContent = `+$${Math.round(maxSaving).toLocaleString()}/mo`;
+        statSavings.style.color = 'var(--sage)';
+      } else {
+        statSavings.textContent = `$0/mo`;
+        statSavings.style.color = 'var(--text-muted)';
+      }
+    }
 
     const propCounter = document.getElementById('nav-prop-count');
     if (propCounter) propCounter.textContent = this.properties.length;
@@ -1556,6 +1565,8 @@ class PropertyHunterApp {
   renderProperties() {
     const grid = document.getElementById('properties-grid');
     if (!grid) return;
+
+    this.updateSuburbFilterOptions();
 
     let filtered = [...this.properties];
 
@@ -1835,6 +1846,38 @@ class PropertyHunterApp {
     }
   }
 
+  updateSuburbFilterOptions() {
+    const select = document.getElementById('filter-suburb-select');
+    if (!select) return;
+
+    const suburbCounts = {};
+    (this.properties || []).forEach(p => {
+      const s = (p.suburb || '').trim();
+      if (s) {
+        suburbCounts[s] = (suburbCounts[s] || 0) + 1;
+      }
+    });
+
+    const suburbs = Object.keys(suburbCounts).sort();
+
+    if (suburbs.length === 0) {
+      select.innerHTML = '<option value="all">📍 Suburb: No properties</option>';
+      select.disabled = true;
+      select.classList.remove('active');
+      return;
+    }
+
+    select.disabled = false;
+    let html = `<option value="all" ${this.filterSuburb === 'all' ? 'selected' : ''}>📍 Suburb: All Suburbs (${this.properties.length})</option>`;
+    suburbs.forEach(sub => {
+      const isSel = this.filterSuburb.toLowerCase() === sub.toLowerCase();
+      html += `<option value="${sub}" ${isSel ? 'selected' : ''}>📍 Suburb: ${sub} (${suburbCounts[sub]})</option>`;
+    });
+
+    select.innerHTML = html;
+    select.classList.toggle('active', this.filterSuburb !== 'all');
+  }
+
   resetFilters() {
     this.filterSuburb = 'all';
     this.filterPetSafe = false;
@@ -1844,11 +1887,16 @@ class PropertyHunterApp {
       this.saveDataLocally();
       this.recalculateAllMetrics();
     }
-    document.querySelectorAll('.filter-pill[data-suburb]').forEach(p => p.classList.toggle('active', p.dataset.suburb === 'all'));
+    const suburbSelect = document.getElementById('filter-suburb-select');
+    if (suburbSelect) {
+      suburbSelect.value = 'all';
+      suburbSelect.classList.remove('active');
+    }
     const petBtn = document.getElementById('filter-pets');
     if (petBtn) petBtn.classList.remove('active');
     const searchInput = document.getElementById('property-search');
     if (searchInput) searchInput.value = '';
+    this.updateSuburbFilterOptions();
     this.renderHeaderStats();
     this.renderProperties();
   }
