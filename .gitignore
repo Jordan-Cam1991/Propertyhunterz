@@ -1,0 +1,5 @@
+.DS_Store
+scratch/
+*.pyc
+__pycache__/
+nestquest-web.zip

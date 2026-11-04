@@ -1,0 +1,195 @@
+{
+  "sale": {
+    "estimatedSalePrice": 1400000,
+    "existingMortgage": 806992,
+    "sellingExpenses": 40000,
+    "netSaleEquity": 553008,
+    "currentMonthlyMortgage": 4810,
+    "currentWeeklyBillsExMortgage": 706,
+    "combinedIncome": 3812,
+    "incomeFrequency": "weekly",
+    "disposableIncomeWeekly": 1903,
+    "savingsAccount": 75000,
+    "shares": 20000,
+    "otherAssets": 25000
+  },
+  "purchaseDefaults": {
+    "defaultInterestRate": 6.2,
+    "loanTermYears": 30,
+    "otherBuyingExpenses": 4000,
+    "conveyancingBAndP": 4000
+  },
+  "profiles": {
+    "emma": {
+      "name": "Emma",
+      "age": 34,
+      "workLocation": "Eight Mile Plains",
+      "preferredSuburb": "Morningside",
+      "priorityShops": "High (wants walking distance to shops / cafes)",
+      "priorityCity": "High (close to city / train)",
+      "bedroomPreference": "Happy with 3 bedroom",
+      "weights": {
+        "location": 0.35,
+        "walkability": 0.25,
+        "commute": 0.2,
+        "finances": 0.1,
+        "space": 0.1
+      }
+    },
+    "jordan": {
+      "name": "Jordan",
+      "age": 35,
+      "workLocation": "Eight Mile Plains",
+      "preferredSuburb": "Everton Park / Everton Hills",
+      "priorityFamily": "High (close to Callum & Kaitlin, parents)",
+      "prioritySchools": "High (good schools for potential child)",
+      "priorityDogWalks": "High (green spaces, parks, creeks)",
+      "bedroomPreference": "Happy with 3, but strongly wants 4 bed that feels like a real home",
+      "weights": {
+        "homeFeelAndBeds": 0.3,
+        "familyProximity": 0.25,
+        "dogWalksAndNature": 0.2,
+        "finances": 0.15,
+        "commute": 0.1
+      }
+    },
+    "furBabies": [
+      {
+        "name": "Senior Cat",
+        "type": "Cat",
+        "age": 16,
+        "needs": "Quiet, stress-free spaces, minimal stairs/safe layout, low noise"
+      },
+      {
+        "name": "Adult Cat",
+        "type": "Cat",
+        "age": 6,
+        "needs": "Sunlit window spots, indoor play room, secure screens"
+      },
+      {
+        "name": "Senior Dog",
+        "type": "Dog",
+        "age": 14,
+        "needs": "CRITICAL: Level living / minimal steep stairs (3 levels is very difficult on arthritic joints), direct access to grass or private courtyard"
+      },
+      {
+        "name": "Active Dog",
+        "type": "Dog",
+        "age": 8,
+        "needs": "Nearby parks, walking tracks, creeks, secure fencing"
+      }
+    ],
+    "generic": {
+      "preferredSuburbs": [
+        "Everton Hills",
+        "Everton Park",
+        "Morningside"
+      ],
+      "preferredBedrooms": [
+        3,
+        4
+      ],
+      "notes": "Emma & Jordan: Emma works in Eight Mile Plains, wants café lifestyle, proximity to city and walking distance to shops. Jordan works in Eight Mile Plains, wants 4 bedrooms that feel like a real home, close to Callum & Kaitlin, parents, and nature walks. 14yo senior dog has arthritic joints needing ground-level courtyard and minimal stairs. 8yo active dog loves creek tracks. 2 cats need sunlit quiet spaces.",
+      "weights": {
+        "location": 0.25,
+        "commuteToWork": 0.2,
+        "walkToShops": 0.2,
+        "schools": 0.15,
+        "walkingTracks": 0.2
+      }
+    }
+  },
+  "lifeAnchors": {
+    "suburbs": [
+      "Morningside",
+      "Everton Hills",
+      "Everton Park"
+    ],
+    "destinations": [
+      {
+        "id": "work",
+        "name": "Eight Mile Plains (Work)",
+        "address": "81 Technology Office Park, Eight Mile Plains QLD 4113"
+      },
+      {
+        "id": "family-callum",
+        "name": "Callum & Kaitlin",
+        "address": "Rogers Parade West, Everton Park QLD 4053"
+      },
+      {
+        "id": "parents-emma",
+        "name": "Emma's Parents",
+        "address": "Carindale / Belmont QLD 4152"
+      },
+      {
+        "id": "parents-jordan",
+        "name": "Jordan's Parents",
+        "address": "North Brisbane / Strathpine QLD"
+      },
+      {
+        "id": "cbd",
+        "name": "Brisbane CBD",
+        "address": "Queen Street Mall, Brisbane City QLD 4000"
+      },
+      {
+        "id": "airport",
+        "name": "Brisbane Airport",
+        "address": "Airport Drive, Brisbane Airport QLD 4008"
+      },
+      {
+        "id": "shops",
+        "name": "Walk to Shops & Cafés",
+        "address": "Wynnum Rd Cafes / Brookside Shopping Centre"
+      }
+    ]
+  },
+  "householdBudget": {
+    "combinedIncomeWeekly": 3812,
+    "liquidSavings": 75000,
+    "categories": [
+      {
+        "id": "cat-mortgage",
+        "name": "Current Home Mortgage",
+        "amount": 4810,
+        "frequency": "monthly",
+        "isMortgage": true
+      },
+      {
+        "id": "cat-groceries",
+        "name": "Groceries & Household Supplies",
+        "amount": 280,
+        "frequency": "weekly"
+      },
+      {
+        "id": "cat-utilities",
+        "name": "Utilities (Electricity, Water, Gas)",
+        "amount": 110,
+        "frequency": "weekly"
+      },
+      {
+        "id": "cat-rates",
+        "name": "Council Rates & Urban Utilities",
+        "amount": 75,
+        "frequency": "weekly"
+      },
+      {
+        "id": "cat-insurance",
+        "name": "Insurances (Home, Auto, Health)",
+        "amount": 125,
+        "frequency": "weekly"
+      },
+      {
+        "id": "cat-pets",
+        "name": "4 Fur Babies (Food, Vet & Meds)",
+        "amount": 70,
+        "frequency": "weekly"
+      },
+      {
+        "id": "cat-transport",
+        "name": "Fuel & Transport",
+        "amount": 46,
+        "frequency": "weekly"
+      }
+    ]
+  }
+}

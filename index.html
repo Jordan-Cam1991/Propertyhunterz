@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NestQuest AI">
+  <meta name="theme-color" content="#FAF7F2">
+  <title>NestQuest AI — Emma & Jordan's Property Suite</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏡</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-inner">
+        <div class="brand-section">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">
+              NestQuest AI
+              <span class="brand-badge">Brisbane</span>
+            </h1>
+            <p class="brand-subtitle">Emma & Jordan's Sale & Purchase Decision Sanctuary</p>
+          </div>
+        </div>
+
+        <!-- Quick Stats Pill Bar -->
+        <div class="header-quick-stats">
+          <div class="quick-stat-chip">
+            <span class="dot-terracotta"></span>
+            <span>Net Equity: <strong id="stat-net-equity">$553,008</strong></span>
+          </div>
+          <div class="quick-stat-chip">
+            <span class="dot-green"></span>
+            <span>Cashflow Boost: <strong id="stat-max-savings" style="color: var(--sage);">+$2,072/mo</strong></span>
+          </div>
+          <div class="quick-stat-chip">
+            <span>🐾 <strong>4 Fur Babies</strong></span>
+          </div>
+          <button class="btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" onclick="app.openMobileConnectModal()">
+            📱 Phone App
+          </button>
+          <button class="btn-primary" id="btn-open-add-modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Property
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="main-nav">
+      <button class="nav-tab-btn active" data-tab="properties">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        Property Hub
+        <span class="nav-counter" id="nav-prop-count">5</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="compare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Head-to-Head Compare
+      </button>
+
+      <button class="nav-tab-btn" data-tab="inspections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Inspection Planner
+        <span class="nav-counter" id="nav-inspection-count" style="display: none; background: var(--sage); color: white;">0</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="advisor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.587-1.11L3 22l1.11-4.413A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"/></svg>
+        AI Advisor & Chat
+      </button>
+
+      <button class="nav-tab-btn" data-tab="finances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Sale & Financial Simulator
+      </button>
+
+      <button class="nav-tab-btn" data-tab="about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        About Us
+      </button>
+    </nav>
+
+    <!-- TAB 1: PROPERTIES HUB -->
+    <section id="view-properties" class="tab-view">
+      <!-- Toolbar Filters -->
+      <div class="filter-toolbar">
+        <div class="filter-group">
+          <span style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">Suburb:</span>
+          <button class="filter-pill active" data-suburb="all">All Suburbs</button>
+          <button class="filter-pill" data-suburb="Ashgrove">Ashgrove</button>
+          <button class="filter-pill" data-suburb="Everton Hills">Everton Hills</button>
+          <button class="filter-pill" data-suburb="Everton Park">Everton Park</button>
+          <button class="filter-pill" data-suburb="Morningside">Morningside</button>
+          <button class="filter-pill" data-suburb="McDowall">McDowall</button>
+          <button class="filter-pill" data-suburb="Camp Hill">Camp Hill</button>
+          <button class="filter-pill" id="filter-pets" style="display: inline-flex; align-items: center; gap: 5px;">
+            🐾 Pet Safe (Courtyard & ≤2 Levels)
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="property-search" placeholder="Search address, features...">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Sort:</span>
+            <select id="sort-select" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-size: 13px; font-family: var(--font-sans); background: white;">
+              <option value="overall">Highest AI Fit</option>
+              <option value="emma">Emma Match %</option>
+              <option value="jordan">Jordan Match %</option>
+              <option value="pets">Fur Babies Safety</option>
+              <option value="savings">Highest Monthly Savings</option>
+              <option value="price-asc">Price (Low to High)</option>
+              <option value="price-desc">Price (High to Low)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Properties Grid -->
+      <div class="properties-grid" id="properties-grid"></div>
+    </section>
+
+    <!-- TAB 2: HEAD-TO-HEAD COMPARE -->
+    <section id="view-compare" class="tab-view" style="display: none;">
+      <div id="comparison-view-content"></div>
+    </section>
+
+    <!-- TAB: INSPECTION PLANNER -->
+    <section id="view-inspections" class="tab-view" style="display: none;">
+      <div id="inspections-view-content"></div>
+    </section>
+
+    <!-- TAB 3: AI ADVISOR & CHAT -->
+    <section id="view-advisor" class="tab-view" style="display: none;">
+      <div class="ai-advisor-layout">
+        <!-- Sidebar with Presets -->
+        <aside class="advisor-sidebar">
+          <div>
+            <h4 style="font-family: var(--font-serif); font-size: 18px; margin-bottom: 6px;">Decision Prompts</h4>
+            <p style="font-size: 13px; color: var(--text-muted);">Instant AI analysis tailored to your family setup:</p>
+          </div>
+
+          <div class="quick-prompts-list">
+            <button class="prompt-btn">🐾 Which property is safest for our 14yo dog & 16yo cat?</button>
+            <button class="prompt-btn">⚖️ Break down the Morningside vs Everton compromise</button>
+            <button class="prompt-btn">💰 Which property frees up the most monthly cash?</button>
+            <button class="prompt-btn">⚠️ Explain the flood & overland flow risks</button>
+            <button class="prompt-btn">🚗 Eight Mile Plains commute analysis</button>
+          </div>
+
+          <div style="background: var(--bg-card-subtle); padding: 14px; border-radius: var(--radius-md); font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
+            💡 <em>Antigravity Advisor considers your $1.4M home equity release, commute to Eight Mile Plains, and 4 fur babies.</em>
+          </div>
+        </aside>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+          <div class="chat-history" id="chat-history-container"></div>
+          <div class="chat-input-bar">
+            <input type="text" id="ai-chat-input" placeholder="Ask about properties, compromises, loan savings, or dog accessibility...">
+            <button class="btn-primary" id="btn-send-chat">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Ask
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: FINANCIAL SIMULATOR -->
+    <section id="view-finances" class="tab-view" style="display: none;">
+      <div id="financial-simulator-content"></div>
+    </section>
+
+    <!-- TAB 5: ABOUT US (WHO WE ARE & LIFE ANCHORS) -->
+    <section id="view-about" class="tab-view" style="display: none;">
+      <div id="about-view-content"></div>
+    </section>
+    <section id="view-compass" class="tab-view" style="display: none;">
+      <div id="compass-view-content"></div>
+    </section>
+
+    <!-- Floating Compare Bar -->
+    <div class="compare-floating-bar" id="compare-floating-bar">
+      <span style="font-size: 14px; font-weight: 600;" id="compare-count-badge">0 Selected</span>
+      <button class="btn-sage" id="btn-floating-compare">
+        Compare Head-to-Head ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD / IMPORT PROPERTY MODAL -->
+  <div class="modal-backdrop" id="add-property-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-add-modal">✕</button>
+      <h2 class="modal-header-title">Add New Candidate Property</h2>
+      <p class="modal-header-subtitle">Drop screenshots into chat for instant AI extraction, paste listing text, or enter manually.</p>
+
+      <!-- Import Subtabs -->
+      <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; flex-wrap: wrap;">
+        <button class="filter-pill active import-tab-btn" data-mode="ai">💬 Drop Screenshots to AI (Recommended)</button>
+        <button class="filter-pill import-tab-btn" data-mode="paste">📋 Quick Text Paste</button>
+        <button class="filter-pill import-tab-btn" data-mode="form">✍️ Manual Form</button>
+      </div>
+
+      <!-- Pane 0: AI Chat Drop (Primary Recommended Workflow) -->
+      <div id="import-pane-ai" class="import-subtab-pane">
+        <div style="background: linear-gradient(135deg, #F4F7F4 0%, #E8F0E9 100%); border: 1.5px solid var(--sage-light, #C8DEC9); border-radius: var(--radius-md); padding: 22px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <div style="width: 48px; height: 48px; background: var(--sage); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; box-shadow: var(--shadow-sm);">
+              🤖
+            </div>
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--sage); margin: 0 0 3px 0;">
+                The 1-Step Workflow: Just Drop Screenshots in Chat!
+              </h3>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                Zero setup needed. No bookmarklets, no scraping errors, no tedious form typing.
+              </p>
+            </div>
+          </div>
+
+          <div style="background: white; border-radius: var(--radius-sm); padding: 16px 18px; border: 1px solid var(--border-light); margin-bottom: 14px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              📱 How it works on your phone:
+            </h4>
+            <ol style="margin-left: 20px; font-size: 13.5px; line-height: 1.75; color: var(--text-main);">
+              <li>Whenever you or Emma find a house on <strong>Realestate.com.au</strong> or <strong>Domain</strong> on your phone:</li>
+              <li>Take 1 or 2 quick screenshots of the <strong>photos, price & specs</strong> (or copy the link/text).</li>
+              <li>Drop them right here into your <strong>Antigravity AI Assistant chat</strong>!</li>
+            </ol>
+          </div>
+
+          <div style="background: #FDF8F3; border-left: 3px solid var(--terracotta); padding: 14px; border-radius: 4px; font-size: 13px; color: var(--text-main); line-height: 1.55;">
+            <strong>✨ Your AI Assistant automatically:</strong>
+            <ul style="margin: 6px 0 0 18px; padding: 0;">
+              <li>Extracts address, bedrooms, bathrooms, car spaces, storeys & courtyard</li>
+              <li>Crops high-res facade photos and saves architectural floor plans</li>
+              <li>Cross-references Property.com.au / PropTrack automated valuations</li>
+              <li>Calculates exact Google Maps drive & transit commute times to all family anchors</li>
+              <li>Runs the financial simulator & calculates your exact monthly cash freed up</li>
+              <li>Scores Emma, Jordan & Fur Baby accessibility match</li>
+              <li>Uploads it straight into your live Property Hub!</li>
+            </ul>
+          </div>
+
+          <div style="text-align: center; margin-top: 18px;">
+            <button type="button" class="btn-primary" style="background: var(--sage); border-color: var(--sage); padding: 12px 24px; font-size: 14px; font-weight: 700;" onclick="app.closeAddModal(); app.switchTab('advisor');">
+              💬 Open AI Chat to Drop Screenshots ➔
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pane 1: Smart Paste -->
+      <div id="import-pane-paste" class="import-subtab-pane" style="display: none;">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+            <label>Paste Property Description or Raw Listing Text</label>
+            <button type="button" id="btn-sample-paste" style="background: none; border: none; color: var(--terracotta); font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: underline;">
+              Try Sample Listing Text
+            </button>
+          </div>
+          <div style="background: var(--bg-card-subtle); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+            <strong>How to use:</strong> Select & copy any text from the property page on Realestate.com.au or Domain, paste it below, and click <strong>AI Parse Text</strong>!
+          </div>
+          <textarea id="paste-text-input" rows="5" placeholder="Copy & paste any listing text or description here (e.g. '12/40 Wynnum Rd, Morningside. Offers over $950k, 3 Bed, 2 Bath, 2 Car, private courtyard, body corp $1,100 pq...')..."></textarea>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-primary" id="btn-parse-paste" type="button">AI Parse Text ➔</button>
+          </div>
+          <div id="paste-status" style="font-size: 13px; margin-top: 8px;"></div>
+        </div>
+      </div>
+
+      <!-- Pane 2: Main Form -->
+      <div id="import-pane-form" class="import-subtab-pane" style="display: none;">
+        <form id="add-property-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Street Address *</label>
+              <input type="text" id="form-address" required placeholder="e.g. 5/12 Richmond Road">
+            </div>
+
+            <div class="form-group">
+              <label>Suburb *</label>
+              <select id="form-suburb" required>
+                <option value="Ashgrove">Ashgrove</option>
+                <option value="Everton Hills">Everton Hills</option>
+                <option value="Everton Park">Everton Park</option>
+                <option value="Morningside">Morningside</option>
+                <option value="McDowall">McDowall</option>
+                <option value="Camp Hill">Camp Hill</option>
+                <option value="Stafford">Stafford</option>
+                <option value="Mitchelton">Mitchelton</option>
+                <option value="Kedron">Kedron</option>
+                <option value="Coorparoo">Coorparoo</option>
+                <option value="Other">Other Brisbane Suburb</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Advertised Guide Price</label>
+              <input type="text" id="form-guide" placeholder="e.g. Offers over $950,000">
+            </div>
+
+            <div class="form-group">
+              <label>Modelled Purchase Price ($ AUD) *</label>
+              <input type="number" id="form-modelled-price" required value="950000" step="5000">
+            </div>
+
+            <div class="form-group">
+              <label>Bedrooms</label>
+              <input type="number" id="form-bedrooms" value="3" min="1" max="6">
+            </div>
+
+            <div class="form-group">
+              <label>Bathrooms</label>
+              <input type="number" id="form-bathrooms" value="2" step="0.5" min="1" max="5">
+            </div>
+
+            <div class="form-group">
+              <label>Parking Setup</label>
+              <input type="text" id="form-parking" placeholder="e.g. Side-by-side double garage">
+            </div>
+
+            <div class="form-group">
+              <label>Levels / Storeys</label>
+              <select id="form-levels">
+                <option value="1">1 Level (Single Level)</option>
+                <option value="2" selected>2 Levels (Townhouse)</option>
+                <option value="3">3 Levels (Tri-level)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Outdoor Space</label>
+              <select id="form-outdoor">
+                <option value="Private courtyard" selected>Private Courtyard (Great for Pets)</option>
+                <option value="Fenced yard / garden">Fenced Yard / Garden</option>
+                <option value="Balconies only">Balconies Only (Stairs for Pets)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Body Corporate ($ / Quarter)</label>
+              <input type="number" id="form-body-corp" value="1200" step="50">
+            </div>
+
+            <div class="form-group">
+              <label>Brisbane Council Risk Overlays</label>
+              <select id="form-risk">
+                <option value="None flagged" selected>None Flagged (Clean)</option>
+                <option value="Flood overlay flagged">Flood Overlay Flagged</option>
+                <option value="Overland flow flagged">Overland Flow Flagged</option>
+                <option value="Bushfire overlay flagged">Bushfire Overlay Flagged</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Key Compromise / Trade-off</label>
+              <input type="text" id="form-compromise" placeholder="e.g. 1 car garage or stairs for 14yo dog">
+            </div>
+
+            <div class="form-group form-group-full">
+              <label>Online Listing Link</label>
+              <input type="url" id="form-link" placeholder="https://www.realestate.com.au/...">
+            </div>
+
+            <div class="form-group form-group-full">
+              <label>Hero Photo URL</label>
+              <input type="url" id="form-image-url" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="form-group form-group-full">
+              <label>Personal Notes & Impressions</label>
+              <textarea id="form-notes" rows="3" placeholder="Inspection impressions, Emma's thoughts, Jordan's feedback..."></textarea>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button class="btn-secondary" type="button" onclick="app.closeAddModal()">Cancel</button>
+            <button class="btn-primary" type="submit">Save & Run AI Evaluation</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPERTY DETAIL DRAWER MODAL -->
+  <div class="modal-backdrop" id="detail-drawer-modal">
+    <div class="modal-card" style="max-width: 840px;">
+      <button class="modal-close-btn" onclick="document.getElementById('detail-drawer-modal').classList.remove('open')">✕</button>
+      <div id="detail-drawer-content"></div>
+    </div>
+  </div>
+
+  <!-- HIGH-RES FLOORPLAN VIEWER MODAL -->
+  <div class="modal-backdrop" id="floorplan-viewer-modal">
+    <div class="modal-card" style="max-width: 960px; max-height: 92vh; text-align: center; padding: 24px;">
+      <button class="modal-close-btn" onclick="document.getElementById('floorplan-viewer-modal').classList.remove('open')">✕</button>
+      <h3 id="floorplan-modal-title" style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 12px; text-align: left;">Architectural Floor Plan</h3>
+      <div style="overflow: auto; max-height: 75vh; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white; padding: 12px;">
+        <img id="floorplan-modal-img" src="" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" alt="Property Floor Plan">
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+        <button class="btn-primary" onclick="document.getElementById('floorplan-viewer-modal').classList.remove('open')">Close Floor Plan</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- INLINE PROPERTY SPEC EDITOR MODAL -->
+  <div class="modal-backdrop" id="spec-edit-modal">
+    <div class="modal-card" style="max-width: 460px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeSpecEditModal()">✕</button>
+      <h3 id="spec-edit-modal-title" style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 8px;">Edit Property Detail</h3>
+      <p id="spec-edit-modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Update value and recalculate AI scores.</p>
+      <div id="spec-edit-modal-body"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn-secondary" type="button" onclick="app.closeSpecEditModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveSpecEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY CORPORATE EDITOR MODAL -->
+  <div class="modal-backdrop" id="bodycorp-edit-modal">
+    <div class="modal-card" style="max-width: 480px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeBodyCorpModal()">✕</button>
+      <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">🏢 Edit Body Corporate</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Enter either Weekly, Monthly, or Quarterly. The other amounts update automatically.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">Weekly Body Corporate ($/wk):</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 12px; top: 10px; font-weight: 700; color: var(--text-muted);">$</span>
+            <input type="number" id="edit-bc-weekly" style="padding-left: 26px;" step="1" oninput="app.handleBcInput('weekly')">
+          </div>
+          <span style="font-size: 11.5px; color: var(--text-muted);">e.g. /wk for Bunya Road, /wk for Rogers Parade</span>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">Monthly Body Corporate ($/mo):</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 12px; top: 10px; font-weight: 700; color: var(--text-muted);">$</span>
+            <input type="number" id="edit-bc-monthly" style="padding-left: 26px;" step="1" oninput="app.handleBcInput('monthly')">
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">Quarterly Body Corporate ($/qtr):</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 12px; top: 10px; font-weight: 700; color: var(--text-muted);">$</span>
+            <input type="number" id="edit-bc-quarterly" style="padding-left: 26px;" step="1" oninput="app.handleBcInput('quarterly')">
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button class="btn-secondary" type="button" onclick="app.closeBodyCorpModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveBodyCorpEdit()">Save Body Corporate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARKING EDITOR MODAL -->
+  <div class="modal-backdrop" id="parking-edit-modal">
+    <div class="modal-card" style="max-width: 460px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeParkingModal()">✕</button>
+      <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">🚗 Edit Parking Configuration</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Set vehicle spaces and garage layout (vital for Jordan's vehicle and storage needs).
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Number of Car Spaces:</label>
+          <select id="edit-parking-spaces">
+            <option value="1">1 Car Space</option>
+            <option value="2">2 Car Spaces</option>
+            <option value="3">3 Car Spaces</option>
+            <option value="4">4+ Car Spaces</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Parking / Garage Type:</label>
+          <select id="edit-parking-type">
+            <option value="Double lockup garage (side-by-side)">Double lockup garage (side-by-side)</option>
+            <option value="2 car tandem lockup garage">2 car tandem lockup garage</option>
+            <option value="Single lockup garage + carport">Single lockup garage + carport</option>
+            <option value="Single lockup garage">Single lockup garage</option>
+            <option value="Covered carport">Covered carport</option>
+            <option value="Open off-street bay">Open off-street bay</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button class="btn-secondary" type="button" onclick="app.closeParkingModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveParkingEdit()">Save Parking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSPECTION TIME EDITOR MODAL -->
+  <div class="modal-backdrop" id="inspection-edit-modal">
+    <div class="modal-card" style="max-width: 480px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeInspectionModal()">✕</button>
+      <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">🗓️ Open Inspection Time</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Add or update the upcoming open home inspection slot.
+      </p>
+      <div class="form-group">
+        <label style="font-size: 13px; font-weight: 700;">Inspection Schedule Text:</label>
+        <input type="text" id="edit-inspection-input" placeholder="e.g. Sat 7 Nov 9:00 am - 9:30 am">
+      </div>
+      <div style="margin-top: 10px;">
+        <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">Quick Presets:</span>
+        <div class="suggestion-chips-container" style="margin-top: 6px;">
+          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 9:00 am'">Sat 7 Nov 9:00 am</button>
+          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 10:15 am'">Sat 7 Nov 10:15 am</button>
+          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 11:30 am'">Sat 7 Nov 11:30 am</button>
+          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Thu 5 Nov 4:30 pm'">Thu 5 Nov 4:30 pm</button>
+          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='By Private Appointment'">By Appointment</button>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button class="btn-secondary" type="button" onclick="app.closeInspectionModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveInspectionEdit()">Save Inspection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIFE ANCHOR DESTINATION & ADDRESS MODAL -->
+  <div class="modal-backdrop" id="anchor-edit-modal">
+    <div class="modal-card" style="max-width: 540px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeAnchorModal()">✕</button>
+      <h3 id="anchor-modal-title" style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">📍 Life Anchor Destination</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Set destination name and street address. NestQuest AI links directly to Google Maps and calculates commute timings for every townhouse.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Destination Name:</label>
+          <input type="text" id="edit-anchor-name" placeholder="e.g. Callum & Kaitlin, Eight Mile Plains Work, Gym...">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Street Address or Suburb (Google Maps Verified):</label>
+          <input type="text" id="edit-anchor-address" list="suggested-brisbane-addresses" placeholder="e.g. Rogers Parade West, Everton Park QLD 4053" oninput="app.updateAnchorMapsPreview()">
+          <datalist id="suggested-brisbane-addresses">
+            <option value="81 Technology Office Park, Eight Mile Plains QLD 4113">Work (Eight Mile Plains)</option>
+            <option value="Rogers Parade West, Everton Park QLD 4053">Callum & Kaitlin</option>
+            <option value="Carindale / Belmont QLD 4152">Emma's Parents</option>
+            <option value="Strathpine QLD 4500">Jordan's Parents</option>
+            <option value="Queen Street Mall, Brisbane City QLD 4000">Brisbane CBD</option>
+            <option value="Airport Drive, Brisbane Airport QLD 4008">Brisbane Airport</option>
+            <option value="Brookside Shopping Centre, 159 Osborne Rd, Mitchelton QLD 4053">Brookside Shopping Centre</option>
+            <option value="Wynnum Road Cafés, Morningside QLD 4170">Wynnum Rd Cafés</option>
+            <option value="Westfield Chermside, Gympie Rd, Chermside QLD 4032">Westfield Chermside</option>
+            <option value="Ferny Grove Train Station, Ferny Grove QLD 4055">Ferny Grove Station</option>
+            <option value="South Bank Parklands, South Brisbane QLD 4101">South Bank</option>
+          </datalist>
+        </div>
+        <div>
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">Quick Address Presets:</span>
+          <div class="suggestion-chips-container" style="margin-top: 6px;">
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('81 Technology Office Park, Eight Mile Plains QLD 4113')">📍 Eight Mile Plains Work</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Rogers Parade West, Everton Park QLD 4053')">📍 Callum & Kaitlin</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Carindale / Belmont QLD 4152')">📍 Emma's Parents</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Strathpine QLD 4500')">📍 Jordan's Parents</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Brookside Shopping Centre, 159 Osborne Rd, Mitchelton QLD 4053')">📍 Brookside Retail</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Wynnum Road Cafés, Morningside QLD 4170')">📍 Morningside Cafés</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Queen Street Mall, Brisbane City QLD 4000')">📍 Brisbane CBD</button>
+            <button type="button" class="suggestion-chip" onclick="app.setAnchorAddressPreset('Airport Drive, Brisbane Airport QLD 4008')">📍 Brisbane Airport</button>
+          </div>
+        </div>
+        <div id="anchor-maps-preview" style="font-size: 12px; color: var(--sage); padding: 8px 12px; background: var(--bg-sage-soft); border-radius: 4px; display: none;"></div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button class="btn-secondary" type="button" onclick="app.closeAnchorModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveAnchorModal()">Save Destination</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD BUDGET CATEGORY MODAL -->
+  <div class="modal-backdrop" id="budget-category-modal">
+    <div class="modal-card" style="max-width: 440px; padding: 24px;">
+      <button class="modal-close-btn" onclick="app.closeBudgetCategoryModal()">✕</button>
+      <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">+ Add Budget Category</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Add a regular household expense or savings category.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Category Name:</label>
+          <input type="text" id="new-budget-name" placeholder="e.g. Health & Fitness, Entertainment, Dining...">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Expense Amount ($ AUD):</label>
+          <input type="number" id="new-budget-amount" placeholder="e.g. 50" step="1">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 13px; font-weight: 700;">Billing Frequency:</label>
+          <select id="new-budget-freq" style="padding: 10px; font-size: 14px; border-radius: 4px; border: 1px solid var(--border-medium);">
+            <option value="weekly">Weekly ($/wk)</option>
+            <option value="monthly">Monthly ($/mo)</option>
+            <option value="yearly">Yearly ($/yr)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
+        <button class="btn-secondary" type="button" onclick="app.closeBudgetCategoryModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="app.saveNewBudgetCategory()">Add Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Phone Connection Modal -->
+  <div class="modal-backdrop" id="mobile-connect-modal">
+    <div class="modal-card" style="max-width: 520px; padding: 26px;">
+      <button class="modal-close-btn" onclick="app.closeMobileConnectModal()">✕</button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <span style="font-size: 26px;">📱</span>
+        <h3 style="font-family: var(--font-serif); font-size: 22px; margin: 0; color: var(--text-main);">
+          Use on Jordan & Emma's Phones
+        </h3>
+      </div>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+        NestQuest AI is fully mobile-optimised. Both of you can browse townhouses, view floor plans, check driving times, and log inspection ratings simultaneously right from your phones!
+      </p>
+
+      <!-- Card 1: Home Wi-Fi Setup -->
+      <div style="background: #FFFDF9; border: 1.5px solid #F0E3D5; border-radius: var(--radius-md); padding: 18px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <strong style="font-size: 15px; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+            📶 Option 1: At Home (Same Wi-Fi)
+          </strong>
+          <span style="font-size: 11px; font-weight: 700; background: var(--bg-sage-soft); color: var(--sage); padding: 3px 8px; border-radius: 12px;">READY NOW</span>
+        </div>
+
+        <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
+          <div style="background: white; padding: 10px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); text-align: center;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=http%3A%2F%2F192.168.1.30%3A8550" alt="Scan to open on phone" width="140" height="140" style="display: block;">
+            <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px; display: block;">Point Camera to Scan</span>
+          </div>
+
+          <div style="flex: 1; min-width: 200px;">
+            <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px;">Or type this URL into Safari/Chrome:</div>
+            <div style="background: white; border: 1px solid var(--border-medium); border-radius: 4px; padding: 8px 10px; font-family: monospace; font-size: 14px; font-weight: 700; color: var(--terracotta); display: flex; justify-content: space-between; align-items: center;">
+              <span>http://192.168.1.30:8550</span>
+              <button type="button" class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="navigator.clipboard.writeText('http://192.168.1.30:8550'); alert('Copied URL to clipboard!');">Copy</button>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px;">
+              Alternative: <code style="color: var(--text-main);">http://Emmas-MacBook-Air.local:8550</code>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-card-subtle); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 14px; font-size: 12.5px; color: var(--text-main); line-height: 1.45;">
+          <strong>📲 How to save it as an App on your Home Screen:</strong>
+          <div style="margin-top: 4px;">• <strong>iPhone (Safari):</strong> Tap the <strong>Share</strong> button (box with upward arrow) ➔ Scroll down & tap <strong>"Add to Home Screen"</strong>.</div>
+          <div style="margin-top: 2px;">• <strong>Android (Chrome):</strong> Tap the <strong>3 dots (menu)</strong> ➔ Tap <strong>"Add to Home screen"</strong> (or "Install app").</div>
+        </div>
+      </div>
+
+      <!-- Card 2: Away from Home / 4G Inspections -->
+      <div style="background: #FAFDFB; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px 16px; font-size: 13px;">
+        <strong style="color: var(--text-main); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          🚗 Option 2: Out at Open Home Inspections (4G / 5G Mobile Data)
+        </strong>
+        <p style="color: var(--text-muted); margin: 0 0 10px 0; font-size: 12.5px; line-height: 1.45;">
+          The local Wi-Fi address works while you are at home or when the Mac is on the same network. When you're out driving between inspections on Saturday, you have two great options:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-main);">
+          <div>• <strong>Free Cloud URL (Vercel / Netlify / GitHub Pages):</strong> We can deploy this static suite in 1 minute to a private live URL like <code>https://nestquest.vercel.app</code> that you and Emma can access anywhere on Earth from your phones.</div>
+          <div>• <strong>Personal Hotspot:</strong> Connect your Mac to your phone's personal hotspot in the car, or run a free Cloudflare tunnel.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn-primary" type="button" onclick="app.closeMobileConnectModal()">Got it, thanks!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/calculator.js"></script>
+  <script src="js/ai-engine.js"></script>
+  <script src="js/scraper.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
