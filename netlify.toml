@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  command = "echo 'Static build ready'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
