@@ -393,6 +393,41 @@ function estimateBrisbaneDistance(address, suburb) {
 
 const DEFAULT_PROPERTIES = [
   {
+      "id": "prop-old-northern-2-178",
+      "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
+      "suburb": "Everton Park",
+      "link": "https://www.realestate.com.au/property-townhouse-qld-everton+park-146399120",
+      "advertisedGuide": "Offers From $799,000",
+      "modelledPrice": 800000,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "parking": "2 car secure remote garage",
+      "parkingSpaces": 2,
+      "levels": 2,
+      "outdoorSpace": "Private fully fenced courtyard",
+      "standoutFeature": "Generous 187m² build area with 2-car garage & fully fenced courtyard in Everton Park",
+      "lifestyleFit": "Northside lifestyle (Jordan preferred), 5 mins to Callum & Kaitlin, walk to Everton Plaza",
+      "planningRisk": "None flagged",
+      "keyCompromise": "Commute to Eight Mile Plains (~38 mins peak)",
+      "inspectionTimes": "Sat 7 Nov 10:00 am",
+      "quarterlyBodyCorp": 1100,
+      "monthlyBodyCorp": 366.67,
+      "weeklyBodyCorp": 85,
+      "imageUrl": "",
+      "floorplanUrl": "",
+      "images": [],
+      "distances": {
+          "workEMP": "38 mins",
+          "cityTransit": "28 mins express bus (Route 350 / 359)",
+          "shopsWalk": "2 mins drive / 800m to Everton Plaza & Woolworths",
+          "callumKaitlin": "5 mins (Extremely close)",
+          "parentsEmma": "20 mins",
+          "parentsJordan": "30 mins",
+          "airport": "22 mins (via Airport Link)"
+      },
+      "notes": "Contemporary 2-level townhouse built 2017 with large 187m² layout. 3 bedrooms with built-in robes, master with ensuite, 3 toilets, air conditioning, and study. Secure 2-car remote garage and private fully fenced courtyard for the 4 fur babies. 800m to Everton Plaza dining & Woolworths, and only 5 mins to Callum & Kaitlin. Incredible financial cashflow freeing up +$3,165/mo in mortgage payments."
+  },
+  {
     id: "prop-waterworks-2-181",
     address: "2/181 Waterworks Road, Ashgrove, Qld 4060",
     suburb: "Ashgrove",
@@ -1228,6 +1263,22 @@ class PropertyHunterApp {
             if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
               this.properties = cloudProps.filter(p => !this.deletedPropertyIds.has(p.id));
               localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
+            } else {
+              // Auto-merge new candidate properties from cloudProps not in localStorage
+              let cloudMerged = false;
+              cloudProps.forEach(cp => {
+                if (!this.deletedPropertyIds.has(cp.id)) {
+                  const exists = parsed.some(p => p.id === cp.id || (p.address && cp.address && p.address.toLowerCase().trim() === cp.address.toLowerCase().trim()));
+                  if (!exists) {
+                    parsed.unshift(cp);
+                    cloudMerged = true;
+                  }
+                }
+              });
+              if (cloudMerged) {
+                this.properties = parsed.filter(p => !this.deletedPropertyIds.has(p.id));
+                localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
+              }
             }
           }
         }
@@ -1262,7 +1313,20 @@ class PropertyHunterApp {
     let parsedProps = null;
     try { parsedProps = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
     if (parsedProps && Array.isArray(parsedProps) && parsedProps.length > 0) {
+      let localMerged = false;
+      DEFAULT_PROPERTIES.forEach(dp => {
+        if (!this.deletedPropertyIds.has(dp.id)) {
+          const exists = parsedProps.some(p => p.id === dp.id || (p.address && dp.address && p.address.toLowerCase().trim() === dp.address.toLowerCase().trim()));
+          if (!exists) {
+            parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
+            localMerged = true;
+          }
+        }
+      });
       this.properties = parsedProps.filter(p => !this.deletedPropertyIds.has(p.id));
+      if (localMerged) {
+        localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
+      }
     } else if (!this.properties || this.properties.length === 0) {
       this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.deletedPropertyIds.has(p.id));
     }
