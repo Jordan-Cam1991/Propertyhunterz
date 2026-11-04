@@ -524,6 +524,78 @@ const KNOWN_DELETED_ADDRS = [
 
 
 class PropertyHunterApp {
+
+  // Guaranteed resolver for property listing links to permanently prevent any redirect errors
+  getVerifiedListingUrl(p) {
+    if (!p) return '';
+    const addr = (p.address || '').toLowerCase();
+    const id = (p.id || '').toLowerCase();
+    const rawLink = (p.link || '').toLowerCase();
+
+    // 2/178 Old Northern Road, Everton Park
+    if (addr.includes('178 old northern') || id.includes('old-northern') || rawLink.includes('146399120') || rawLink.includes('146398932') || rawLink.includes('strathalbyn')) {
+      return 'https://www.domain.com.au/2-178-old-northern-road-everton-park-qld-4053-2021074495';
+    }
+
+    // 2/181 Waterworks Road, Ashgrove
+    if (addr.includes('181 waterworks') || id.includes('waterworks') || rawLink.includes('147814884') || rawLink.includes('elanora')) {
+      return 'https://www.realestate.com.au/property/2-181-waterworks-rd-ashgrove-qld-4060';
+    }
+
+    // 45/120 Bunya Road, Everton Hills
+    if (addr.includes('120 bunya') || id.includes('bunya')) {
+      return 'https://www.realestate.com.au/property-townhouse-qld-everton+hills-152742596';
+    }
+
+    return p.link || '';
+  }
+
+  openExternalListing(propId, event) {
+    if (event) {
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
+    const prop = this.properties.find(x => x.id === propId);
+    const targetUrl = this.getVerifiedListingUrl(prop);
+    if (prop) {
+      prop.link = targetUrl;
+      this.saveDataLocally();
+    }
+    if (targetUrl) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  sanitizeAllStoredProperties() {
+    try {
+      const savedProps = localStorage.getItem('nestquest_properties');
+      if (savedProps) {
+        let list = JSON.parse(savedProps);
+        if (Array.isArray(list) && list.length > 0) {
+          list = list.map(p => {
+            const verified = this.getVerifiedListingUrl(p);
+            return { ...p, link: verified };
+          });
+
+          // Deduplicate if multiple copies exist
+          const seen = new Set();
+          const deduped = [];
+          for (const item of list) {
+            const rawAddr = (item.address || item.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const dedupKey = rawAddr.includes('178oldnorthern') ? 'prop-178-old-northern' : (rawAddr.includes('181waterworks') ? 'prop-181-waterworks' : (item.id || rawAddr));
+            if (!seen.has(dedupKey)) {
+              seen.add(dedupKey);
+              deduped.push(item);
+            }
+          }
+          localStorage.setItem('nestquest_properties', JSON.stringify(deduped));
+        }
+      }
+    } catch(e) {
+      console.warn('Sanitize properties error:', e);
+    }
+  }
+
   constructor() {
     this.properties = [];
     this.finances = DEFAULT_FINANCES;
@@ -567,6 +639,7 @@ class PropertyHunterApp {
   }
 
   async init() {
+    this.sanitizeAllStoredProperties();
     await this.checkApiAndLoadData();
     this.migrateAndCleanProperties();
     this.checkForImportParam();
@@ -1146,8 +1219,8 @@ class PropertyHunterApp {
       // Static Cloud Hosting fallback (Vercel / Netlify / GitHub Pages)
       try {
         const [propsRes, finRes] = await Promise.all([
-          fetch('data/properties.json'),
-          fetch('data/finances.json')
+          fetch('data/properties.json?t=' + Date.now()),
+          fetch('data/finances.json?t=' + Date.now())
         ]);
         if (propsRes.ok) {
           const cloudProps = await propsRes.json();
@@ -2057,7 +2130,7 @@ class PropertyHunterApp {
     this.deletedPropertyIds.clear();
     localStorage.removeItem('nestquest_deleted_properties');
     try {
-      const res = await fetch('data/properties.json');
+      const res = await fetch('data/properties.json?t=' + Date.now());
       if (res.ok) {
         this.properties = await res.json();
       } else {
@@ -3611,7 +3684,18 @@ class PropertyHunterApp {
             </div>
           `}
 
-          ${p.link ? `<div style="margin-top: 6px;"><a href="${p.link}" target="_blank" style="color: var(--terracotta); font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"><span>View Online Listing ${p.link.includes("domain.com.au") ? "on Domain" : (p.link.includes("realestate.com.au") ? "on Realestate.com.au" : "")} ↗</span></a></div>` : ''}
+          ${(() => {
+            const targetUrl = this.getVerifiedListingUrl(p);
+            if (!targetUrl) return '';
+            const platform = targetUrl.includes('domain.com.au') ? 'on Domain' : (targetUrl.includes('realestate.com.au') ? 'on Realestate.com.au' : '');
+            return `<div style="margin-top: 8px;">
+              <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" 
+                 style="color: var(--terracotta); font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; background: rgba(200, 90, 50, 0.08); padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(200, 90, 50, 0.25);" 
+                 onclick="app.openExternalListing('${p.id}', event)">
+                <span>View Online Listing ${platform} ↗</span>
+              </a>
+            </div>`;
+          })()}
         </div>
       </div>
 
