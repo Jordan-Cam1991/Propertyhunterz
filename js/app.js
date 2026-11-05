@@ -711,18 +711,29 @@ class PropertyHunterApp {
     this.deletedPropertyAddresses = new Set(JSON.parse(localStorage.getItem('nestquest_deleted_addresses') || '[]'));
     KNOWN_DELETED_ADDRS.forEach(addr => this.deletedPropertyAddresses.add(addr));
 
-    // Ensure requested properties are NEVER marked as deleted in user browser
-    ['prop-hamilton-11-906', 'prop-hamilton-13-906', 'prop-wardell-72'].forEach(id => this.deletedPropertyIds.delete(id));
-    ['11/906 hamilton', '13/906 hamilton', '72 wardell'].forEach(addr => {
-      this.deletedPropertyAddresses.delete(addr);
-      for (const d of Array.from(this.deletedPropertyAddresses)) {
-        if (d && (d.includes(addr) || addr.includes(d))) this.deletedPropertyAddresses.delete(d);
-      }
-    });
-    try {
-      localStorage.setItem('nestquest_deleted_properties', JSON.stringify(Array.from(this.deletedPropertyIds)));
-      localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(Array.from(this.deletedPropertyAddresses)));
-    } catch(e) {}
+    // Seed properties (DEFAULT_PROPERTIES / data/properties.json) this device has already received.
+    // A seed property is only ever added ONCE per device, so deleting it is permanent across updates.
+    this.seenSeedIds = new Set(JSON.parse(localStorage.getItem('nestquest_seen_seed_ids') || '[]'));
+
+    // One-time migration (runs once only): the user explicitly re-requested these listings on 5 Nov,
+    // so lift any older deletion record for them a single time. After this, deleting them is permanent.
+    if (!localStorage.getItem('nestquest_migration_readd_20261105')) {
+      ['prop-hamilton-11-906', 'prop-hamilton-13-906', 'prop-wardell-72'].forEach(id => {
+        this.deletedPropertyIds.delete(id);
+        this.seenSeedIds.delete(id);
+      });
+      ['11/906 hamilton', '13/906 hamilton', '72 wardell'].forEach(addr => {
+        for (const d of Array.from(this.deletedPropertyAddresses)) {
+          if (d && (d.includes(addr) || addr.includes(d))) this.deletedPropertyAddresses.delete(d);
+        }
+      });
+      try {
+        localStorage.setItem('nestquest_deleted_properties', JSON.stringify(Array.from(this.deletedPropertyIds)));
+        localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(Array.from(this.deletedPropertyAddresses)));
+        localStorage.setItem('nestquest_seen_seed_ids', JSON.stringify(Array.from(this.seenSeedIds)));
+        localStorage.setItem('nestquest_migration_readd_20261105', '1');
+      } catch(e) {}
+    }
     this.selectedSuburbs = new Set();
     this.filterBedrooms = 'all';
     this.filterMaxPrice = 'all';
@@ -733,6 +744,65 @@ class PropertyHunterApp {
     this.isApiAvailable = false;
 
     this.init();
+  }
+
+  /**
+   * Merge seed properties (shipped with app updates) into the user's local list.
+   * Rules that make deletions permanent:
+   *  - A seed property that is tombstoned (deleted) is never added.
+   *  - A seed property this device has already received is never re-added if it is
+   *    missing locally (i.e. the user removed it), even if the tombstone was lost.
+   *  - Only brand-new seed properties (never seen on this device) get added.
+   */
+  mergeSeedProperties(localList, seedList) {
+    let changed = false;
+    const list = (Array.isArray(localList) ? localList : []).filter(p => {
+      const keep = !this.isPropertyDeleted(p);
+      if (!keep) changed = true;
+      return keep;
+    });
+
+    (Array.isArray(seedList) ? seedList : []).forEach(sp => {
+      if (!sp || !sp.id) return;
+      if (this.isPropertyDeleted(sp)) {
+        this.seenSeedIds.add(sp.id);
+        return;
+      }
+      const idx = list.findIndex(p => p.id === sp.id || (p.address && sp.address && p.address.toLowerCase().trim() === sp.address.toLowerCase().trim()));
+      if (idx !== -1) {
+        // Already on this device: keep the user's own edits/photos, only fill gaps from the update
+        const local = list[idx];
+        const merged = { ...JSON.parse(JSON.stringify(sp)) };
+        Object.keys(local).forEach(k => {
+          const v = local[k];
+          const isEmpty = v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
+          if (!isEmpty || merged[k] === undefined) merged[k] = v;
+        });
+        list[idx] = merged;
+        changed = true;
+      } else if (!this.seenSeedIds.has(sp.id)) {
+        // Brand-new listing shipped in an update — add it once
+        list.unshift(JSON.parse(JSON.stringify(sp)));
+        changed = true;
+      }
+      this.seenSeedIds.add(sp.id);
+    });
+
+    try {
+      localStorage.setItem('nestquest_seen_seed_ids', JSON.stringify(Array.from(this.seenSeedIds)));
+    } catch(e) {}
+    return { list, changed };
+  }
+
+  // When the user deliberately re-adds a listing they once deleted, lift the old deletion record
+  clearDeletionRecordForAddress(address) {
+    const a = (address || '').toLowerCase().trim();
+    if (!a) return;
+    const street = a.split(',')[0].trim();
+    for (const d of Array.from(this.deletedPropertyAddresses)) {
+      if (d && (d === a || d === street || a.includes(d))) this.deletedPropertyAddresses.delete(d);
+    }
+    localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(Array.from(this.deletedPropertyAddresses)));
   }
 
   isPropertyDeleted(p) {
@@ -1277,6 +1347,8 @@ class PropertyHunterApp {
           }
 
           // Otherwise, create new property
+          // The user is deliberately re-adding this listing, so lift any old deletion record for it
+          this.clearDeletionRecordForAddress(address);
           let initialQtrBc = Number(prop.quarterlyBodyCorp) || 0;
           if (!initialQtrBc) {
             const addrLower = address.toLowerCase();
@@ -1354,7 +1426,7 @@ class PropertyHunterApp {
         ]);
         if (propsRes.ok) {
           const apiProps = await propsRes.json();
-          this.properties = (Array.isArray(apiProps) ? apiProps : []).filter(p => !this.deletedPropertyIds.has(p.id));
+          this.properties = (Array.isArray(apiProps) ? apiProps : []).filter(p => !this.isPropertyDeleted(p));
         }
         if (finRes.ok) {
           const finData = await finRes.json();
@@ -1378,34 +1450,10 @@ class PropertyHunterApp {
             const savedProps = localStorage.getItem('nestquest_properties');
             let parsed = null;
             try { parsed = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
-            if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-              this.properties = cloudProps.filter(p => !this.isPropertyDeleted(p));
-              localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
-            } else {
-              // Auto-merge new candidate properties from cloudProps not in localStorage and NOT deleted
-              let cloudMerged = false;
-              // Clean existing parsed of any deleted listings first
-              const initialLen = parsed.length;
-              parsed = parsed.filter(p => !this.isPropertyDeleted(p));
-              if (parsed.length !== initialLen) cloudMerged = true;
-
-              cloudProps.forEach(cp => {
-                if (!this.isPropertyDeleted(cp)) {
-                  const idx = parsed.findIndex(p => p.id === cp.id || (p.address && cp.address && p.address.toLowerCase().trim() === cp.address.toLowerCase().trim()));
-                  if (idx === -1) {
-                    parsed.unshift(cp);
-                    cloudMerged = true;
-                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-bunya-45-120' || cp.id.startsWith('prop-hamilton') || cp.id === 'prop-wardell-72') {
-                    parsed[idx] = { ...parsed[idx], ...cp };
-                    cloudMerged = true;
-                  }
-                }
-              });
-              this.properties = parsed.filter(p => !this.isPropertyDeleted(p));
-              if (cloudMerged) {
-                localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
-              }
-            }
+            // Empty saved list ([]) is respected — deleted listings are never re-seeded
+            const { list } = this.mergeSeedProperties(Array.isArray(parsed) ? parsed : [], cloudProps);
+            this.properties = list;
+            localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
           }
         }
         if (finRes.ok) {
@@ -1438,31 +1486,12 @@ class PropertyHunterApp {
 
     let parsedProps = null;
     try { parsedProps = savedProps ? JSON.parse(savedProps) : null; } catch(e) {}
-    if (parsedProps && Array.isArray(parsedProps) && parsedProps.length > 0) {
-      let localMerged = false;
-      // Strip any deleted properties immediately
-      const initialCount = parsedProps.length;
-      parsedProps = parsedProps.filter(p => !this.isPropertyDeleted(p));
-      if (parsedProps.length !== initialCount) localMerged = true;
-
-      DEFAULT_PROPERTIES.forEach(dp => {
-        if (!this.isPropertyDeleted(dp)) {
-          const lidx = parsedProps.findIndex(p => p.id === dp.id || (p.address && dp.address && p.address.toLowerCase().trim() === dp.address.toLowerCase().trim()));
-          if (lidx === -1) {
-            parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
-            localMerged = true;
-          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-bunya-45-120' || dp.id.startsWith('prop-hamilton') || dp.id === 'prop-wardell-72') {
-            parsedProps[lidx] = { ...parsedProps[lidx], ...JSON.parse(JSON.stringify(dp)) };
-            localMerged = true;
-          }
-        }
-      });
-      this.properties = parsedProps.filter(p => !this.isPropertyDeleted(p));
-      if (localMerged) {
-        localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
-      }
-    } else if (!this.properties || this.properties.length === 0) {
-      this.properties = JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)).filter(p => !this.isPropertyDeleted(p));
+    // Note: an empty saved list ([]) is valid — it means the user deleted everything, so don't re-seed.
+    const base = Array.isArray(parsedProps) ? parsedProps : (this.properties || []);
+    const { list, changed } = this.mergeSeedProperties(base, DEFAULT_PROPERTIES);
+    this.properties = list;
+    if (changed || !Array.isArray(parsedProps)) {
+      localStorage.setItem('nestquest_properties', JSON.stringify(this.properties));
     }
     
     // Auto-correct legacy incorrect/broken listing links stored in localStorage
@@ -3573,6 +3602,7 @@ class PropertyHunterApp {
       }
     }
 
+    this.clearDeletionRecordForAddress(address);
     this.properties.unshift(newProp);
     this.recalculateAllMetrics();
     this.saveDataLocally();
@@ -4066,6 +4096,8 @@ class PropertyHunterApp {
 
     // Permanently record deleted ID and address so it is NEVER re-added
     this.deletedPropertyIds.add(propId);
+    this.seenSeedIds.add(propId);
+    localStorage.setItem('nestquest_seen_seed_ids', JSON.stringify(Array.from(this.seenSeedIds)));
     if (prop && prop.address) {
       const cleanAddr = prop.address.toLowerCase().trim();
       this.deletedPropertyAddresses.add(cleanAddr);
