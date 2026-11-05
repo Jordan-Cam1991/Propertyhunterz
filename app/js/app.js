@@ -403,7 +403,7 @@ const DEFAULT_PROPERTIES = [
     "outdoorSpace": "Fenced easy-care courtyard & private covered balcony",
     "standoutFeature": "City-fringe living 4.5km to CBD, 450m to Ashgrove Marketplace & Woolworths, very low body corp",
     "lifestyleFit": "Emma's dream café & boutique lifestyle, ultra walkable to shops, express bus to CBD",
-    "planningRisk": "None flagged (No flood/bushfire overlays)",
+    "planningRisk": "None flagged",
     "keyCompromise": "3-storey layout with internal stairs (challenging for 14yo senior arthritic dog)",
     "inspectionTimes": "Today 5:00 pm",
     "quarterlyBodyCorp": 950,
@@ -1800,6 +1800,15 @@ class PropertyHunterApp {
 
     const hasRealPhoto = Boolean(p.imageUrl && !p.imageUrl.includes('unsplash'));
 
+    // Accurate risk check: ignore "None flagged", "clear", "no flood", etc.
+    const hasRealRisk = Boolean(
+      p.planningRisk &&
+      !p.planningRisk.toLowerCase().includes('none') &&
+      !p.planningRisk.toLowerCase().includes('clear') &&
+      !p.planningRisk.toLowerCase().includes('no flood') &&
+      !p.planningRisk.toLowerCase().includes('nil')
+    );
+
     return `
       <div class="property-card" data-id="${p.id}">
         ${hasRealPhoto ? `
@@ -1850,74 +1859,74 @@ class PropertyHunterApp {
         `}
 
         <div class="card-content">
+          <!-- Zone 1: Address & Price Header -->
           <div class="card-header-row">
-            <div>
-              <h3 class="card-address">${p.address}</h3>
+            <div class="card-header-main">
+              <h3 class="card-address" title="${p.address}">${p.address}</h3>
               <div class="card-guide-price">Guide: <strong>${p.advertisedGuide || 'Offers Invited'}</strong></div>
-              ${p.propertyValue ? `
-                <div style="margin-top: 3px;">
-                  <span style="background: #FAF5FF; color: #6B21A8; border: 1px solid #E9D5FF; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                    🏛️ PropTrack: $${Number(p.propertyValue).toLocaleString()} (${p.propertyValueConfidence ? p.propertyValueConfidence.replace('CONFIDENCE','Conf') : 'High Conf'})
-                  </span>
-                </div>
-              ` : `
-                ${(!p.advertisedGuide || p.advertisedGuide.toLowerCase().includes('for sale') || p.advertisedGuide.toLowerCase().includes('expressions') || p.advertisedGuide.toLowerCase().includes('contact') || p.advertisedGuide.toLowerCase().includes('auction')) ? `
-                  <div style="margin-top: 3px;">
-                    <button type="button" style="background: none; border: none; color: #7C3AED; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline;" onclick="app.lookupPropertyComAu('${p.id}', event)">
-                      🏛️ Check Property.com.au
-                    </button>
-                  </div>
-                ` : ''}
-              `}
             </div>
-            <div style="text-align: right;">
+            <div class="card-price-block">
               <span class="modelled-price-badge">$${(p.modelledPrice || 0).toLocaleString()}</span>
-              <div style="font-size: 11px; color: var(--text-muted);">${p.propertyValue && p.modelledPrice === p.propertyValue ? 'Property.com.au' : 'Modelled Price'}</div>
+              <div class="card-price-label">${p.propertyValue && p.modelledPrice === p.propertyValue ? 'Property.com.au' : 'Modelled Price'}</div>
             </div>
           </div>
 
+          <!-- Zone 2: Consistent Valuation Slot -->
+          <div class="card-valuation-slot">
+            ${p.propertyValue ? `
+              <span class="badge-proptrack">
+                🏛️ PropTrack: $${Number(p.propertyValue).toLocaleString()} (${p.propertyValueConfidence ? p.propertyValueConfidence.replace(/CONFIDENCE/i, 'Conf') : 'High Conf'})
+              </span>
+            ` : `
+              <button type="button" class="btn-check-proptrack" onclick="app.lookupPropertyComAu('${p.id}', event)">
+                🏛️ Check Property.com.au ➔
+              </button>
+            `}
+          </div>
+
+          <!-- Zone 3: Specs Row (Beds | Baths | Car | Levels) -->
           <div class="specs-row">
             <div class="spec-item" title="Bedrooms">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg>
-              ${p.bedrooms} Beds
+              <span>${p.bedrooms} Beds</span>
             </div>
             <div class="spec-item" title="Bathrooms">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1Z"/><path d="M6 12V5a2 2 0 0 1 2-2h3v9"/></svg>
-              ${p.bathrooms} Baths
+              <span>${p.bathrooms} Baths</span>
             </div>
             <div class="spec-item" title="Garage / Parking">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>
-              ${p.parkingSpaces || 2} Car
+              <span>${p.parkingSpaces || 2} Car</span>
             </div>
             <div class="spec-item" title="Levels">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M7 20v-5h10v5M10 15V9h4v6M12 9V3"/></svg>
-              ${p.levels} Levels
+              <span>${p.levels} Levels</span>
             </div>
           </div>
 
-          <!-- Quick Commute Summary Line -->
-          <div style="font-size: 11.5px; color: var(--text-muted); background: #FAFDFB; border: 1px solid var(--border-light); border-radius: 4px; padding: 5px 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
-            <span>🚗 <strong>Work:</strong> ${calculateGoogleMapsTimings('81 Technology Office Park, Eight Mile Plains', p.suburb || p.address).drive}</span>
-            <span>🚗 <strong>Family:</strong> ${calculateGoogleMapsTimings('Rogers Parade West, Everton Park', p.suburb || p.address).drive}</span>
-            <span style="color: var(--terracotta); font-weight: 600; cursor: pointer;" onclick="app.openDetailDrawer('${p.id}')">All Timings ➔</span>
+          <!-- Zone 4: Quick Commute Summary Line -->
+          <div class="card-commute-preview">
+            <span class="card-commute-item">🚗 <strong>Work:</strong> ${calculateGoogleMapsTimings('81 Technology Office Park, Eight Mile Plains', p.suburb || p.address).drive}</span>
+            <span class="card-commute-item">🚗 <strong>Family:</strong> ${calculateGoogleMapsTimings('Rogers Parade West, Everton Park', p.suburb || p.address).drive}</span>
+            <span class="card-commute-link" onclick="app.openDetailDrawer('${p.id}')">All Timings ➔</span>
           </div>
 
-          <!-- AI Matchers Bar -->
+          <!-- Zone 5: AI Fit Score 5-Pillar Grid -->
           <div class="ai-match-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 12px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 5px;">
+            <div class="ai-match-header">
+              <span class="ai-match-title">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 AI Fit Score
               </span>
-              <span style="font-size: 13px; font-weight: 800; color: var(--terracotta);">${scores.overallFit}% Match</span>
+              <span class="ai-match-score">${scores.overallFit}% Match</span>
             </div>
-            <div class="match-scores-grid" style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));">
+            <div class="match-scores-grid">
               <div class="match-score-cell" title="Location Match">
-                <div class="match-score-label">📍 Location</div>
+                <div class="match-score-label">📍 Loc</div>
                 <div class="match-score-value ${getScoreColorClass(scores.locationScore || 85)}">${scores.locationScore || 85}%</div>
               </div>
               <div class="match-score-cell" title="Commute to Work">
-                <div class="match-score-label">🚗 Commute</div>
+                <div class="match-score-label">🚗 Comm</div>
                 <div class="match-score-value ${getScoreColorClass(scores.commuteScore || 70)}">${scores.commuteScore || 70}%</div>
               </div>
               <div class="match-score-cell" title="Walk to Shops">
@@ -1935,23 +1944,22 @@ class PropertyHunterApp {
             </div>
           </div>
 
-          <!-- Risk Alert if any -->
-          ${p.planningRisk && p.planningRisk !== 'None flagged' ? `
-            <div class="card-risk-pill">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              ${p.planningRisk}
-            </div>
-          ` : ''}
+          <!-- Zone 6: Risk Alert & Key Trade-off Slot -->
+          <div class="card-insights-slot">
+            ${hasRealRisk ? `
+              <div class="card-risk-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>${p.planningRisk}</span>
+              </div>
+            ` : ''}
 
-          <!-- Key Compromise -->
-          ${p.keyCompromise ? `
             <div class="card-compromise-pill">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <span><strong>Trade-off:</strong> ${p.keyCompromise}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span><strong>Trade-off:</strong> ${p.keyCompromise || 'None identified'}</span>
             </div>
-          ` : ''}
+          </div>
 
-          <!-- Footer: Recycle Bin & View Breakdown -->
+          <!-- Zone 7: Pinned Bottom Actions -->
           <div class="card-footer">
             <button type="button" class="btn-card-delete" onclick="event.stopPropagation(); app.deleteProperty('${p.id}')" title="Delete listing" aria-label="Delete listing">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1961,7 +1969,7 @@ class PropertyHunterApp {
                 <line x1="14" y1="11" x2="14" y2="17"></line>
               </svg>
             </button>
-            <button type="button" class="btn-primary btn-card-breakdown" style="flex-grow: 1;" onclick="app.openDetailDrawer('${p.id}')">
+            <button type="button" class="btn-primary btn-card-breakdown" onclick="app.openDetailDrawer('${p.id}')">
               View Breakdown
             </button>
           </div>

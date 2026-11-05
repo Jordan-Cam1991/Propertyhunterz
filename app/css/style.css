@@ -640,6 +640,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 24px;
+  align-items: stretch;
 }
 
 /* Property Card */
@@ -653,6 +654,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  height: 100%;
 }
 
 .property-card:hover {
@@ -816,122 +818,278 @@ body {
 }
 
 .card-content {
-  padding: 22px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
+/* Zone 1: Address & Price Header */
 .card-header-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  min-height: 72px;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
+.card-header-main {
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .card-address {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.3;
+  min-height: 48px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0 0 4px 0;
 }
 
 .card-guide-price {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-muted);
-  margin-bottom: 14px;
+  min-height: 18px;
+  line-height: 18px;
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-price-block {
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .modelled-price-badge {
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--terracotta);
+  line-height: 1.2;
+  display: block;
 }
 
-/* Feature Spec Chips (Bed / Bath / Car / Levels) */
+.card-price-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Zone 2: Consistent Valuation Slot */
+.card-valuation-slot {
+  height: 26px;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.badge-proptrack {
+  background: #FAF5FF;
+  color: #6B21A8;
+  border: 1px solid #E9D5FF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.btn-check-proptrack {
+  background: #FAF5FF;
+  border: 1px dashed #D8B4FE;
+  color: #7C3AED;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-check-proptrack:hover {
+  background: #F3E8FF;
+  border-color: #9333EA;
+  color: #6B21A8;
+}
+
+/* Zone 3: Specs Row (Bed / Bath / Car / Levels) */
 .specs-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 0;
+  justify-content: space-between;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 4px;
   border-top: 1px solid var(--border-light);
   border-bottom: 1px solid var(--border-light);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .spec-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
+  gap: 5px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .spec-item svg {
   color: var(--text-subtle);
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
-/* AI Score Matchers Grid */
+/* Zone 4: Commute Preview Row */
+.card-commute-preview {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background: #FAFDFB;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 0 10px;
+  height: 34px;
+  min-height: 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.card-commute-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-commute-link {
+  color: var(--terracotta);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Zone 5: AI Fit Score 5-Pillar Grid */
 .ai-match-container {
   background-color: var(--bg-card-subtle);
   border-radius: var(--radius-md);
-  padding: 14px;
-  margin-bottom: 16px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.ai-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 20px;
+  margin-bottom: 8px;
+}
+
+.ai-match-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ai-match-score {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--terracotta);
 }
 
 .match-scores-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   text-align: center;
 }
 
 .match-score-cell {
   background: white;
   border-radius: var(--radius-sm);
-  padding: 8px 6px;
+  padding: 6px 2px;
   border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .match-score-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .match-score-value {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.1;
 }
 
 .score-high { color: var(--sage); }
 .score-medium { color: var(--honey); }
 .score-low { color: var(--terracotta); }
 
-/* Compromise / Feature Pill */
+/* Zone 6: Risk Alert & Key Trade-off Slot */
+.card-insights-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 52px;
+  margin-bottom: 12px;
+}
+
 .card-compromise-pill {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   background-color: var(--bg-amber-soft);
   border-left: 3px solid var(--honey);
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 4px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--honey-dark);
-  margin-bottom: 16px;
-  line-height: 1.4;
+  line-height: 1.35;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .card-risk-pill {
@@ -940,23 +1098,25 @@ body {
   gap: 6px;
   background-color: var(--rose-soft);
   color: var(--rose-alert);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  margin-bottom: 12px;
   width: fit-content;
 }
 
-/* Card Action Footer */
+/* Zone 7: Pinned Bottom Actions */
 .card-footer {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-light);
-  gap: 10px;
+  margin-top: auto !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 0 0 0 !important;
+  border-top: 1px solid var(--border-light, #E8E2D8) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+  box-sizing: border-box;
 }
 
 .compare-checkbox-label {
@@ -1895,15 +2055,18 @@ input[type="range"].app-slider.sage::-webkit-slider-thumb {
 
   .card-address {
     font-size: 17px;
+    min-height: auto;
   }
 
   .card-header-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    min-height: auto;
   }
 
-  .card-header-row > div:last-child {
+  .card-header-row > div:last-child,
+  .card-price-block {
     text-align: left;
     display: flex;
     align-items: baseline;
@@ -2055,49 +2218,7 @@ input[type="range"].app-slider.sage::-webkit-slider-thumb {
 }
 
 
-/* Card Footer: Central 3 Buttons (Compare, Recycle Bin, View Breakdown) */
-.card-footer {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  padding: 14px 12px 6px 12px !important;
-  border-top: 1px solid var(--border-light, #E8E2D8);
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.btn-card-compare {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: var(--radius-sm, 8px);
-  border: 1.5px solid var(--border-medium, #D4CCC0);
-  background: white;
-  color: var(--text-main, #23201E);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.btn-card-compare:hover {
-  border-color: var(--sage, #4A6B53);
-  color: var(--sage, #4A6B53);
-  background: #F4F7F4;
-}
-
-.btn-card-compare.active {
-  background: var(--sage, #4A6B53);
-  border-color: var(--sage, #4A6B53);
-  color: white;
-}
-
+/* Card Footer Action Buttons */
 .btn-card-breakdown {
   display: inline-flex;
   align-items: center;
@@ -2107,7 +2228,7 @@ input[type="range"].app-slider.sage::-webkit-slider-thumb {
   font-size: 13px;
   font-weight: 700;
   border-radius: var(--radius-sm, 8px);
-  flex-shrink: 0;
+  flex-grow: 1;
 }
 
 
