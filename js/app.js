@@ -426,41 +426,6 @@ const DEFAULT_PROPERTIES = [
     "notes": "3-bedroom boutique townhouse in prime Ashgrove pocket. 3 toilets, master ensuite with private balcony, ducted air-conditioning, dishwasher, single garage + open car space. Ground-level laundry opens to fully fenced easy-care courtyard. Ultra convenient: 450m walk to Ashgrove Marketplace & Woolworths, 600m to Coles, under 4.5km to CBD. Very low body corporate (~$73/wk). Note: 3 levels of stairs requires navigation for 14yo pet."
   },
   {
-    "id": "prop-old-northern-2-178",
-    "address": "2/178 Old Northern Road, Everton Park, QLD 4053",
-    "suburb": "Everton Park",
-    "link": "https://www.domain.com.au/2-178-old-northern-road-everton-park-qld-4053-2021074495",
-    "advertisedGuide": "Offers From $799,000",
-    "modelledPrice": 800000,
-    "bedrooms": 3,
-    "bathrooms": 2,
-    "parking": "2 car secure remote garage",
-    "parkingSpaces": 2,
-    "levels": 2,
-    "outdoorSpace": "Private fully fenced courtyard",
-    "standoutFeature": "Generous 187m² build area with 2-car garage & fully fenced courtyard in Everton Park",
-    "lifestyleFit": "Northside lifestyle (Jordan preferred), 5 mins to Callum & Kaitlin, walk to Everton Plaza",
-    "planningRisk": "None flagged",
-    "keyCompromise": "Commute to Eight Mile Plains (~38 mins peak)",
-    "inspectionTimes": "Sat 7 Nov 10:00 am",
-    "quarterlyBodyCorp": 1100,
-    "monthlyBodyCorp": 366.67,
-    "weeklyBodyCorp": 85,
-    "imageUrl": "",
-    "floorplanUrl": "",
-    "images": [],
-    "distances": {
-      "workEMP": "38 mins",
-      "cityTransit": "28 mins express bus (Route 350 / 359)",
-      "shopsWalk": "2 mins drive / 800m to Everton Plaza & Woolworths",
-      "callumKaitlin": "5 mins (Extremely close)",
-      "parentsEmma": "20 mins",
-      "parentsJordan": "30 mins",
-      "airport": "22 mins (via Airport Link)"
-    },
-    "notes": "Contemporary 2-level townhouse built 2017 with large 187m² layout. 3 bedrooms with built-in robes, master with ensuite, 3 toilets, air conditioning, and study. Secure 2-car remote garage and private fully fenced courtyard for the 4 fur babies. 800m to Everton Plaza dining & Woolworths, and only 5 mins to Callum & Kaitlin. Incredible financial cashflow freeing up +$3,165/mo in mortgage payments."
-  },
-  {
     "id": "prop-bunya-45-120",
     "address": "45/120 Bunya Road, Everton Hills, Qld 4053",
     "suburb": "Everton Hills",
@@ -622,12 +587,12 @@ const DEFAULT_PROPERTIES = [
   }
 ];
 const KNOWN_DELETED_IDS = [
-  'baringa-8-19', 'dickson-3-58', 'rogers-17-44', 'richmond-17-101',
+  'prop-old-northern-2-178', 'baringa-8-19', 'dickson-3-58', 'rogers-17-44', 'richmond-17-101',
   'prop-1793691380686', 'prop-1793691499861', 'prop-1793694074546',
   'prop-1793692691513', 'prop-1793692488780', 'prop-1793693976863'
 ];
 const KNOWN_DELETED_ADDRS = [
-  '8/19 baringa', '3/58 dickson', '17/44 rogers', '17/101 richmond',
+  '178 old northern', '2/178 old northern', '8/19 baringa', '3/58 dickson', '17/44 rogers', '17/101 richmond',
   '6/41 pembroke', '5/84 kent', '3/122 keona', '4/104 albert'
 ];
 
@@ -692,10 +657,21 @@ class PropertyHunterApp {
 
   sanitizeAllStoredProperties() {
     try {
+      // Permanently blacklist and purge 2/178 Old Northern Road
+      const savedDeletedProps = JSON.parse(localStorage.getItem('nestquest_deleted_properties') || '[]');
+      const savedDeletedAddrs = JSON.parse(localStorage.getItem('nestquest_deleted_addresses') || '[]');
+      if (!savedDeletedProps.includes('prop-old-northern-2-178')) savedDeletedProps.push('prop-old-northern-2-178');
+      if (!savedDeletedAddrs.includes('178 old northern')) savedDeletedAddrs.push('178 old northern');
+      if (!savedDeletedAddrs.includes('2/178 old northern')) savedDeletedAddrs.push('2/178 old northern');
+      localStorage.setItem('nestquest_deleted_properties', JSON.stringify(savedDeletedProps));
+      localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(savedDeletedAddrs));
+
       const savedProps = localStorage.getItem('nestquest_properties');
       if (savedProps) {
         let list = JSON.parse(savedProps);
         if (Array.isArray(list) && list.length > 0) {
+          // Immediately purge 2/178 Old Northern Road and any other deleted listing
+          list = list.filter(p => !this.isPropertyDeleted(p) && p.id !== 'prop-old-northern-2-178' && !(p.address && p.address.toLowerCase().includes('178 old northern')));
           list = list.map(p => {
             const verified = this.getVerifiedListingUrl(p);
             return { ...p, link: verified };
@@ -706,7 +682,7 @@ class PropertyHunterApp {
           const deduped = [];
           for (const item of list) {
             const rawAddr = (item.address || item.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            const dedupKey = rawAddr.includes('178oldnorthern') ? 'prop-178-old-northern' : (rawAddr.includes('181waterworks') ? 'prop-181-waterworks' : (item.id || rawAddr));
+            const dedupKey = rawAddr.includes('181waterworks') ? 'prop-181-waterworks' : (item.id || rawAddr);
             if (!seen.has(dedupKey)) {
               seen.add(dedupKey);
               deduped.push(item);
@@ -1419,7 +1395,7 @@ class PropertyHunterApp {
                   if (idx === -1) {
                     parsed.unshift(cp);
                     cloudMerged = true;
-                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178' || cp.id === 'prop-bunya-45-120' || cp.id.startsWith('prop-hamilton') || cp.id === 'prop-wardell-72') {
+                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-bunya-45-120' || cp.id.startsWith('prop-hamilton') || cp.id === 'prop-wardell-72') {
                     parsed[idx] = { ...parsed[idx], ...cp };
                     cloudMerged = true;
                   }
@@ -1475,7 +1451,7 @@ class PropertyHunterApp {
           if (lidx === -1) {
             parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
             localMerged = true;
-          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178' || dp.id === 'prop-bunya-45-120' || dp.id.startsWith('prop-hamilton') || dp.id === 'prop-wardell-72') {
+          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-bunya-45-120' || dp.id.startsWith('prop-hamilton') || dp.id === 'prop-wardell-72') {
             parsedProps[lidx] = { ...parsedProps[lidx], ...JSON.parse(JSON.stringify(dp)) };
             localMerged = true;
           }
