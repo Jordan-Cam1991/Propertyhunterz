@@ -505,6 +505,120 @@ const DEFAULT_PROPERTIES = [
     "propertyValue": 985000,
     "propertyValueConfidence": "HIGH CONFIDENCE",
     "propertyValueSource": "property.com.au"
+  },
+  {
+    "id": "prop-hamilton-11-906",
+    "address": "11/906 Hamilton Road, McDowall, QLD 4053",
+    "suburb": "McDowall",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-mcdowall-152162280",
+    "advertisedGuide": "Offers Over $950,000",
+    "modelledPrice": 950000,
+    "bedrooms": 4,
+    "bathrooms": 2,
+    "parking": "2 car double garage",
+    "parkingSpaces": 2,
+    "levels": 2,
+    "outdoorSpace": "Private covered alfresco with peaceful bushland backdrop",
+    "standoutFeature": "Modern 4-bed executive townhouse with 2.7m ceilings, Bosch appliances, next to McDowall Village",
+    "lifestyleFit": "Suburban sanctuary, ultra close to Callum & Kaitlin, footsteps to McDowall Village dining & groceries",
+    "planningRisk": "None flagged",
+    "keyCompromise": "Commute to Eight Mile Plains (~38-40 mins peak)",
+    "inspectionTimes": "Contact Agent",
+    "quarterlyBodyCorp": 920,
+    "monthlyBodyCorp": 306.67,
+    "weeklyBodyCorp": 71,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "38 mins",
+      "cityTransit": "32 mins express bus (Route 353)",
+      "shopsWalk": "2 mins walk to McDowall Village",
+      "callumKaitlin": "7 mins (Very close)",
+      "parentsEmma": "22 mins",
+      "parentsJordan": "28 mins",
+      "airport": "22 mins"
+    },
+    "notes": "4-bedroom double-storey executive townhouse within Hamilton Residences. Features 2.7m high ceilings, ducted multi-zone air-conditioning, 40mm stone kitchen with island bench, Bosch appliances, study nook, and double lockup garage. Private alfresco opens to peaceful bushland reserve. Positioned directly next to McDowall Village.",
+    "propertyValue": 965000,
+    "propertyValueConfidence": "HIGH CONFIDENCE",
+    "propertyValueSource": "property.com.au"
+  },
+  {
+    "id": "prop-hamilton-13-906",
+    "address": "13/906 Hamilton Road, McDowall, QLD 4053",
+    "suburb": "McDowall",
+    "link": "https://www.realestate.com.au/property-townhouse-qld-mcdowall-152117036",
+    "advertisedGuide": "$989,000",
+    "modelledPrice": 989000,
+    "bedrooms": 4,
+    "bathrooms": 2,
+    "parking": "2 car secure garage",
+    "parkingSpaces": 2,
+    "levels": 2,
+    "outdoorSpace": "Private fenced courtyard & covered outdoor entertaining area",
+    "standoutFeature": "Turnkey 4-bedroom townhouse in Hamilton Residences with premium stone finishes and pet-friendly yard",
+    "lifestyleFit": "Quiet position in boutique complex, footsteps to McDowall Village shops, easy access to northside arterials",
+    "planningRisk": "None flagged",
+    "keyCompromise": "Commute to Eight Mile Plains (~38-40 mins peak)",
+    "inspectionTimes": "Contact Agent",
+    "quarterlyBodyCorp": 920,
+    "monthlyBodyCorp": 306.67,
+    "weeklyBodyCorp": 71,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "38 mins",
+      "cityTransit": "32 mins express bus (Route 353)",
+      "shopsWalk": "2 mins walk to McDowall Village",
+      "callumKaitlin": "7 mins (Very close)",
+      "parentsEmma": "22 mins",
+      "parentsJordan": "28 mins",
+      "airport": "22 mins"
+    },
+    "notes": "Turnkey 4-bedroom executive townhouse in Hamilton Residences. Designer stone kitchen, ducted air con throughout, 2 full bathrooms plus powder room, and double secure parking. Fenced private courtyard for the 4 fur babies, situated next to McDowall Village.",
+    "propertyValue": 989000,
+    "propertyValueConfidence": "HIGH CONFIDENCE",
+    "propertyValueSource": "property.com.au"
+  },
+  {
+    "id": "prop-wardell-72",
+    "address": "72 Wardell Street, Ashgrove, QLD 4060",
+    "suburb": "Ashgrove",
+    "link": "https://www.realestate.com.au/property-house-qld-ashgrove-152233948",
+    "advertisedGuide": "Offers Over $1,050,000",
+    "modelledPrice": 1050000,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "parking": "2 car garage / carport",
+    "parkingSpaces": 2,
+    "levels": 1,
+    "outdoorSpace": "Large 607m² block with huge fully fenced grass backyard",
+    "standoutFeature": "Standalone character house on 607m² land in Ashgrove with NO body corporate fees and zero stairs!",
+    "lifestyleFit": "Emma's dream Ashgrove precinct, single-level stair-free living for 14yo dog, massive yard for 4 fur babies",
+    "planningRisk": "None flagged",
+    "keyCompromise": "Frontage on Wardell Street (traffic during peak hours); higher purchase price",
+    "inspectionTimes": "Check listing",
+    "quarterlyBodyCorp": 0,
+    "monthlyBodyCorp": 0,
+    "weeklyBodyCorp": 0,
+    "imageUrl": "",
+    "floorplanUrl": "",
+    "images": [],
+    "distances": {
+      "workEMP": "26 mins",
+      "cityTransit": "18 mins bus to CBD (Route 385 / 379)",
+      "shopsWalk": "8 mins walk (700m to Ashgrove Marketplace & Woolworths)",
+      "callumKaitlin": "12 mins",
+      "parentsEmma": "17 mins",
+      "parentsJordan": "22 mins",
+      "airport": "19 mins"
+    },
+    "notes": "Rare standalone character home on 607m² in prime Ashgrove. Zero stairs makes it ideal for Emma & Jordan's 14yo senior arthritic pet, and huge 607m² fully fenced backyard gives unlimited room for all 4 fur babies. $0 Body Corporate forever! Note: On Wardell Street.",
+    "propertyValue": 1050000,
+    "propertyValueConfidence": "HIGH CONFIDENCE",
+    "propertyValueSource": "property.com.au"
   }
 ];
 const KNOWN_DELETED_IDS = [
@@ -514,8 +628,7 @@ const KNOWN_DELETED_IDS = [
 ];
 const KNOWN_DELETED_ADDRS = [
   '8/19 baringa', '3/58 dickson', '17/44 rogers', '17/101 richmond',
-  '11/906 hamilton', '13/906 hamilton', '6/41 pembroke', '5/84 kent',
-  '3/122 keona', '4/104 albert'
+  '6/41 pembroke', '5/84 kent', '3/122 keona', '4/104 albert'
 ];
 
 
@@ -527,6 +640,21 @@ class PropertyHunterApp {
     const addr = (p.address || '').toLowerCase();
     const id = (p.id || '').toLowerCase();
     const rawLink = (p.link || '').toLowerCase();
+
+    // 11/906 Hamilton Road, McDowall
+    if (addr.includes('11/906 hamilton') || id.includes('hamilton-11') || rawLink.includes('152162280')) {
+      return 'https://www.realestate.com.au/property-townhouse-qld-mcdowall-152162280';
+    }
+
+    // 13/906 Hamilton Road, McDowall
+    if (addr.includes('13/906 hamilton') || id.includes('hamilton-13') || rawLink.includes('152117036')) {
+      return 'https://www.realestate.com.au/property-townhouse-qld-mcdowall-152117036';
+    }
+
+    // 72 Wardell Street, Ashgrove
+    if (addr.includes('72 wardell') || id.includes('wardell') || rawLink.includes('152233948')) {
+      return 'https://www.realestate.com.au/property-house-qld-ashgrove-152233948';
+    }
 
     // 2/178 Old Northern Road, Everton Park
     if (addr.includes('178 old northern') || id.includes('old-northern') || rawLink.includes('146399120') || rawLink.includes('146398932') || rawLink.includes('strathalbyn')) {
@@ -606,6 +734,19 @@ class PropertyHunterApp {
     KNOWN_DELETED_IDS.forEach(id => this.deletedPropertyIds.add(id));
     this.deletedPropertyAddresses = new Set(JSON.parse(localStorage.getItem('nestquest_deleted_addresses') || '[]'));
     KNOWN_DELETED_ADDRS.forEach(addr => this.deletedPropertyAddresses.add(addr));
+
+    // Ensure requested properties are NEVER marked as deleted in user browser
+    ['prop-hamilton-11-906', 'prop-hamilton-13-906', 'prop-wardell-72'].forEach(id => this.deletedPropertyIds.delete(id));
+    ['11/906 hamilton', '13/906 hamilton', '72 wardell'].forEach(addr => {
+      this.deletedPropertyAddresses.delete(addr);
+      for (const d of Array.from(this.deletedPropertyAddresses)) {
+        if (d && (d.includes(addr) || addr.includes(d))) this.deletedPropertyAddresses.delete(d);
+      }
+    });
+    try {
+      localStorage.setItem('nestquest_deleted_properties', JSON.stringify(Array.from(this.deletedPropertyIds)));
+      localStorage.setItem('nestquest_deleted_addresses', JSON.stringify(Array.from(this.deletedPropertyAddresses)));
+    } catch(e) {}
     this.selectedSuburbs = new Set();
     this.filterBedrooms = 'all';
     this.filterMaxPrice = 'all';
@@ -1278,7 +1419,7 @@ class PropertyHunterApp {
                   if (idx === -1) {
                     parsed.unshift(cp);
                     cloudMerged = true;
-                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178' || cp.id === 'prop-bunya-45-120') {
+                  } else if (cp.id === 'prop-waterworks-2-181' || cp.id === 'prop-old-northern-2-178' || cp.id === 'prop-bunya-45-120' || cp.id.startsWith('prop-hamilton') || cp.id === 'prop-wardell-72') {
                     parsed[idx] = { ...parsed[idx], ...cp };
                     cloudMerged = true;
                   }
@@ -1334,7 +1475,7 @@ class PropertyHunterApp {
           if (lidx === -1) {
             parsedProps.unshift(JSON.parse(JSON.stringify(dp)));
             localMerged = true;
-          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178' || dp.id === 'prop-bunya-45-120') {
+          } else if (dp.id === 'prop-waterworks-2-181' || dp.id === 'prop-old-northern-2-178' || dp.id === 'prop-bunya-45-120' || dp.id.startsWith('prop-hamilton') || dp.id === 'prop-wardell-72') {
             parsedProps[lidx] = { ...parsedProps[lidx], ...JSON.parse(JSON.stringify(dp)) };
             localMerged = true;
           }
