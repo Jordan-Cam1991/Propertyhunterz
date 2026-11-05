@@ -142,6 +142,80 @@ const Calculator = {
       mortgageReduction,
       annualSaving: Math.round(monthlySaving * 12)
     };
+  },
+
+  /**
+   * Calculate mortgage payoff timeline in years and specific payoff month/year
+   * Accounts for minimum principal payments plus extra savings directed to offset.
+   */
+  calculatePayoffTimeline(loanAmount, annualInterestRate = 6.2, loanTermYears = 30, monthlyOffsetSavings = 0, initialOffsetBalance = 0) {
+    const principal = Math.max(0, Number(loanAmount) || 0);
+    if (principal <= 0) {
+      return {
+        standardYears: 0,
+        payoffYears: 0,
+        payoffMonths: 0,
+        payoffDateStr: "Debt Free",
+        standardMonthlyPayment: 0,
+        totalInterestPaid: 0,
+        interestSaved: 0
+      };
+    }
+
+    const monthlyRate = (annualInterestRate / 100) / 12;
+    const nominalMonths = loanTermYears * 12;
+    const standardMonthlyPayment = this.calculateMonthlyMortgage(principal, annualInterestRate, loanTermYears);
+    const standardTotalInterest = Math.max(0, (standardMonthlyPayment * nominalMonths) - principal);
+
+    const monthlyExtra = Math.max(0, Number(monthlyOffsetSavings) || 0);
+    const startBuffer = Math.max(0, Number(initialOffsetBalance) || 0);
+
+    let balance = principal;
+    let offsetAcc = startBuffer;
+    let totalInterestPaid = 0;
+    let months = 0;
+    const maxMonths = 360;
+
+    while (balance > 0.01 && months < maxMonths) {
+      months++;
+      offsetAcc += monthlyExtra;
+      const effectiveDebt = Math.max(0, balance - offsetAcc);
+      
+      if (effectiveDebt <= 0) {
+        break;
+      }
+      
+      const interestForMonth = effectiveDebt * monthlyRate;
+      totalInterestPaid += interestForMonth;
+      
+      const principalPayment = Math.min(balance, standardMonthlyPayment - interestForMonth);
+      balance -= Math.max(0, principalPayment);
+      
+      if (balance <= offsetAcc) {
+        break;
+      }
+    }
+
+    const payoffYears = (months / 12).toFixed(1);
+    
+    // Calculate calendar payoff date (starting from current date)
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth();
+    const targetDate = new Date(curYear, curMonth + months, 1);
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const payoffDateStr = `${monthNames[targetDate.getMonth()]} ${targetDate.getFullYear()}`;
+    const interestSaved = Math.max(0, standardTotalInterest - totalInterestPaid);
+
+    return {
+      standardYears: loanTermYears,
+      payoffYears: Number(payoffYears),
+      payoffMonths: months,
+      payoffDateStr,
+      standardMonthlyPayment,
+      totalInterestPaid: Math.round(totalInterestPaid),
+      interestSaved: Math.round(interestSaved)
+    };
   }
 };
 

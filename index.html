@@ -59,17 +59,6 @@
         Head-to-Head Compare
       </button>
 
-      <button class="nav-tab-btn" data-tab="inspections">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Inspection Planner
-        <span class="nav-counter" id="nav-inspection-count" style="display: none; background: var(--sage); color: white;">0</span>
-      </button>
-
-      <button class="nav-tab-btn" data-tab="advisor">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.587-1.11L3 22l1.11-4.413A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"/></svg>
-        AI Advisor & Chat
-      </button>
-
       <button class="nav-tab-btn" data-tab="finances">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         Sale & Financial Simulator
@@ -153,49 +142,7 @@
       <div id="comparison-view-content"></div>
     </section>
 
-    <!-- TAB: INSPECTION PLANNER -->
-    <section id="view-inspections" class="tab-view" style="display: none;">
-      <div id="inspections-view-content"></div>
-    </section>
-
-    <!-- TAB 3: AI ADVISOR & CHAT -->
-    <section id="view-advisor" class="tab-view" style="display: none;">
-      <div class="ai-advisor-layout">
-        <!-- Sidebar with Presets -->
-        <aside class="advisor-sidebar">
-          <div>
-            <h4 style="font-family: var(--font-serif); font-size: 18px; margin-bottom: 6px;">Decision Prompts</h4>
-            <p style="font-size: 13px; color: var(--text-muted);">Instant AI analysis tailored to your family setup:</p>
-          </div>
-
-          <div class="quick-prompts-list">
-            <button class="prompt-btn">🐾 Which property is safest for our 14yo dog & 16yo cat?</button>
-            <button class="prompt-btn">⚖️ Break down the Morningside vs Everton compromise</button>
-            <button class="prompt-btn">💰 Which property frees up the most monthly cash?</button>
-            <button class="prompt-btn">⚠️ Explain the flood & overland flow risks</button>
-            <button class="prompt-btn">🚗 Eight Mile Plains commute analysis</button>
-          </div>
-
-          <div style="background: var(--bg-card-subtle); padding: 14px; border-radius: var(--radius-md); font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
-            💡 <em>Antigravity Advisor considers your $1.4M home equity release, commute to Eight Mile Plains, and 4 fur babies.</em>
-          </div>
-        </aside>
-
-        <!-- Chat Panel -->
-        <div class="chat-panel">
-          <div class="chat-history" id="chat-history-container"></div>
-          <div class="chat-input-bar">
-            <input type="text" id="ai-chat-input" placeholder="Ask about properties, compromises, loan savings, or dog accessibility...">
-            <button class="btn-primary" id="btn-send-chat">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-              Ask
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: FINANCIAL SIMULATOR -->
+    <!-- TAB 3: FINANCIAL SIMULATOR -->
     <section id="view-finances" class="tab-view" style="display: none;">
       <div id="financial-simulator-content"></div>
     </section>
@@ -518,35 +465,6 @@
     </div>
   </div>
 
-  <!-- INSPECTION TIME EDITOR MODAL -->
-  <div class="modal-backdrop" id="inspection-edit-modal">
-    <div class="modal-card" style="max-width: 480px; padding: 24px;">
-      <button class="modal-close-btn" onclick="app.closeInspectionModal()">✕</button>
-      <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 6px;">🗓️ Open Inspection Time</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-        Add or update the upcoming open home inspection slot.
-      </p>
-      <div class="form-group">
-        <label style="font-size: 13px; font-weight: 700;">Inspection Schedule Text:</label>
-        <input type="text" id="edit-inspection-input" placeholder="e.g. Sat 7 Nov 9:00 am - 9:30 am">
-      </div>
-      <div style="margin-top: 10px;">
-        <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">Quick Presets:</span>
-        <div class="suggestion-chips-container" style="margin-top: 6px;">
-          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 9:00 am'">Sat 7 Nov 9:00 am</button>
-          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 10:15 am'">Sat 7 Nov 10:15 am</button>
-          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Sat 7 Nov 11:30 am'">Sat 7 Nov 11:30 am</button>
-          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='Thu 5 Nov 4:30 pm'">Thu 5 Nov 4:30 pm</button>
-          <button type="button" class="suggestion-chip" onclick="document.getElementById('edit-inspection-input').value='By Private Appointment'">By Appointment</button>
-        </div>
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
-        <button class="btn-secondary" type="button" onclick="app.closeInspectionModal()">Cancel</button>
-        <button class="btn-primary" type="button" onclick="app.saveInspectionEdit()">Save Inspection</button>
-      </div>
-    </div>
-  </div>
-
   <!-- LIFE ANCHOR DESTINATION & ADDRESS MODAL -->
   <div class="modal-backdrop" id="anchor-edit-modal">
     <div class="modal-card" style="max-width: 540px; padding: 24px;">
@@ -701,9 +619,9 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/calculator.js?v=20261104_1625"></script>
-  <script src="js/ai-engine.js?v=20261104_1625"></script>
-  <script src="js/scraper.js?v=20261104_1625"></script>
-  <script src="js/app.js?v=20261104_1625"></script>
+  <script src="js/calculator.js?v=20261105_0940"></script>
+  <script src="js/ai-engine.js?v=20261105_0940"></script>
+  <script src="js/scraper.js?v=20261105_0940"></script>
+  <script src="js/app.js?v=20261105_0940"></script>
 </body>
 </html>

@@ -6,28 +6,24 @@
 // Default Fallback Data (matching Jordan & Emma's spreadsheet exactly)
 const DEFAULT_FINANCES = {
   householdBudget: {
-    combinedIncomeWeekly: 3812,
-    liquidSavings: 75000,
-    categories: [
-      { id: "cat-mortgage", name: "Current Home Mortgage", amount: 4810, frequency: "monthly", isMortgage: true },
-      { id: "cat-groceries", name: "Groceries & Household Supplies", amount: 280, frequency: "weekly" },
-      { id: "cat-utilities", name: "Utilities (Electricity, Water, Gas)", amount: 110, frequency: "weekly" },
-      { id: "cat-rates", name: "Council Rates & Urban Utilities", amount: 75, frequency: "weekly" },
-      { id: "cat-insurance", name: "Insurances (Home, Auto, Health)", amount: 125, frequency: "weekly" },
-      { id: "cat-pets", name: "4 Fur Babies (Food, Vet & Meds)", amount: 70, frequency: "weekly" },
-      { id: "cat-transport", name: "Fuel & Transport", amount: 46, frequency: "weekly" }
-    ]
+    salaryWeekly: 3812,
+    billsWeekly: 750,
+    mortgageMonthly: 4810,
+    savingsWeekly: 500,
+    liquidSavings: 75000
   },
   sale: {
     estimatedSalePrice: 1400000,
     existingMortgage: 806992,
-    sellingExpenses: 40000,
-    netSaleEquity: 553008,
+    agentCommissionPct: 2.0,
+    marketingAndLegal: 4000,
+    sellingExpenses: 32000,
+    netSaleEquity: 561008,
     currentMonthlyMortgage: 4810,
-    currentWeeklyBillsExMortgage: 706,
+    currentWeeklyBillsExMortgage: 750,
     combinedIncome: 3812,
     incomeFrequency: "weekly",
-    disposableIncomeWeekly: 1903,
+    disposableIncomeWeekly: 1452,
     savingsAccount: 75000,
     shares: 20000,
     otherAssets: 25000
@@ -665,6 +661,43 @@ class PropertyHunterApp {
     if (!this.finances.purchaseDefaults) {
       this.finances.purchaseDefaults = JSON.parse(JSON.stringify(DEFAULT_FINANCES.purchaseDefaults));
       modified = true;
+    }
+    if (!this.finances.householdBudget) {
+      this.finances.householdBudget = JSON.parse(JSON.stringify(DEFAULT_FINANCES.householdBudget));
+      modified = true;
+    }
+    const b = this.finances.householdBudget;
+    if (b.salaryWeekly === undefined) {
+      b.salaryWeekly = Number(b.combinedIncomeWeekly || b.weeklyCombinedIncome || 3812);
+      modified = true;
+    }
+    if (b.billsWeekly === undefined) {
+      b.billsWeekly = 750;
+      modified = true;
+    }
+    if (b.mortgageMonthly === undefined) {
+      b.mortgageMonthly = Number(this.finances.sale?.currentMonthlyMortgage || 4810);
+      modified = true;
+    }
+    if (b.savingsWeekly === undefined) {
+      b.savingsWeekly = 500;
+      modified = true;
+    }
+    if (b.liquidSavings === undefined) {
+      b.liquidSavings = 75000;
+      modified = true;
+    }
+    if (this.finances.sale) {
+      if (this.finances.sale.agentCommissionPct === undefined) {
+        this.finances.sale.agentCommissionPct = 2.0;
+        modified = true;
+      }
+      if (this.finances.sale.marketingAndLegal === undefined) {
+        this.finances.sale.marketingAndLegal = 4000;
+        modified = true;
+      }
+      const agentFee = Math.round(Number(this.finances.sale.estimatedSalePrice || 1400000) * (this.finances.sale.agentCommissionPct / 100));
+      this.finances.sale.sellingExpenses = agentFee + Number(this.finances.sale.marketingAndLegal || 4000);
     }
 
     this.properties.forEach(p => {
@@ -1668,17 +1701,11 @@ class PropertyHunterApp {
       case 'compare':
         this.renderComparisonView();
         break;
-      case 'inspections':
-        this.renderInspectionsView();
-        break;
       case 'finances':
         this.renderFinancialSimulator();
         break;
-      case 'advisor':
-        this.renderAdvisorView();
-        break;
-      case 'compass':
-        this.renderCompassView();
+      default:
+        this.renderProperties();
         break;
     }
   }
@@ -1865,25 +1892,6 @@ class PropertyHunterApp {
               <div style="font-size: 11px; color: var(--text-muted);">${p.propertyValue && p.modelledPrice === p.propertyValue ? 'Property.com.au' : 'Modelled Price'}</div>
             </div>
           </div>
-
-          <!-- Open Inspection Bar with + Plan Button -->
-          ${p.inspectionTimes ? `
-            <div class="card-inspection-bar ${isPlanned ? 'planned' : ''}">
-              <span class="inspection-time-text">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                ${p.inspectionTimes}
-              </span>
-              <button class="btn-plan-toggle ${isPlanned ? 'planned' : ''}" onclick="app.toggleInspection('${p.id}', event)">
-                ${isPlanned ? '✓ Planned' : '+ Plan Inspection'}
-              </button>
-            </div>
-          ` : `
-            <div class="card-inspection-bar" style="background: #FAFAFA; border: 1px dashed var(--border-light); justify-content: flex-end;">
-              <button class="btn-plan-toggle" style="background: var(--bg-card-subtle); color: var(--text-muted); border: 1px solid var(--border-light);" onclick="app.promptAddInspectionTime('${p.id}', event)">
-                + Plan Inspection
-              </button>
-            </div>
-          `}
 
           <div class="specs-row">
             <div class="spec-item" title="Bedrooms">
@@ -2738,19 +2746,44 @@ class PropertyHunterApp {
   }
 
   // -------------------------------------------------------------
-  // VIEW 4: FINANCIAL SIMULATOR (INTERACTIVE SLIDERS & PROFILE MANAGER)
+  // VIEW 3: FINANCIAL SIMULATOR (SIMPLIFIED & ENHANCED)
   // -------------------------------------------------------------
   renderFinancialSimulator() {
     const container = document.getElementById('financial-simulator-content');
     if (!container) return;
 
-    // Safe fallbacks
+    // Safe fallbacks & defaults
     const sale = (this.finances && this.finances.sale) ? this.finances.sale : DEFAULT_FINANCES.sale;
     const defaults = (this.finances && this.finances.purchaseDefaults) ? this.finances.purchaseDefaults : DEFAULT_FINANCES.purchaseDefaults;
     const budget = (this.finances && this.finances.householdBudget) ? this.finances.householdBudget : DEFAULT_FINANCES.householdBudget;
-    const categories = budget.categories || [];
 
-    const equity = Calculator.calculateSaleEquity(sale.estimatedSalePrice, sale.existingMortgage, sale.sellingExpenses);
+    // Agent commission % (USER UPDATE 4)
+    const agentPct = Number(sale.agentCommissionPct !== undefined ? sale.agentCommissionPct : 2.0);
+    const salePrice = Number(sale.estimatedSalePrice || 1400000);
+    const existingMortgage = Number(sale.existingMortgage || 806992);
+    const agentFee = Math.round(salePrice * (agentPct / 100));
+    const marketingLegal = Number(sale.marketingAndLegal || 4000);
+    const totalSellingExpenses = agentFee + marketingLegal;
+    sale.sellingExpenses = totalSellingExpenses;
+
+    // Net Equity Released
+    const equity = Calculator.calculateSaleEquity(salePrice, existingMortgage, totalSellingExpenses);
+    sale.netSaleEquity = equity;
+
+    // Budget numbers (USER UPDATE 3)
+    const salaryWeekly = Number(budget.salaryWeekly !== undefined ? budget.salaryWeekly : (budget.combinedIncomeWeekly || 3812));
+    const billsWeekly = Number(budget.billsWeekly !== undefined ? budget.billsWeekly : 750);
+    const mortgageMonthly = Number(sale.currentMonthlyMortgage || 4810);
+    const mortgageWeekly = mortgageMonthly / 4.333333;
+    const savingsWeekly = Number(budget.savingsWeekly !== undefined ? budget.savingsWeekly : 500);
+    const liquidBuffer = Number(budget.liquidSavings !== undefined ? budget.liquidSavings : 75000);
+
+    // Remaining Disposable Income = Salary - (Bills + Mortgage + Savings)
+    const totalOutgoingsWeekly = billsWeekly + mortgageWeekly + savingsWeekly;
+    const disposableWeekly = salaryWeekly - totalOutgoingsWeekly;
+    const disposableMonthly = disposableWeekly * 4.333333;
+
+    // Target Townhouse Purchase Model
     const targetPrice = this.targetPurchasePrice || 950000;
     const duty = Calculator.calculateQldTransferDuty(targetPrice, true);
     const otherCosts = Number(defaults.otherBuyingExpenses || 4000);
@@ -2759,56 +2792,158 @@ class PropertyHunterApp {
     const interestRate = Number(defaults.defaultInterestRate || 6.2);
     const loanTerm = Number(defaults.loanTermYears || 30);
     const monthlyPni = Calculator.calculateMonthlyRepayment(newLoan, interestRate, loanTerm);
-    const currentMortgage = Number(sale.currentMonthlyMortgage || 4810);
-    const monthlySaving = currentMortgage - monthlyPni;
-    const mortgageReduction = Math.max(0, (sale.existingMortgage || 806992) - newLoan);
+    const monthlySaving = mortgageMonthly - monthlyPni;
+    const mortgageReduction = Math.max(0, existingMortgage - newLoan);
 
-    // Calculate household budget totals
-    let totalWeeklyBills = 0;
-    categories.forEach(cat => {
-      let amt = Number(cat.amount) || 0;
-      if (!cat.isMortgage) {
-        let weeklyAmt = cat.frequency === 'weekly' ? amt : (cat.frequency === 'monthly' ? amt / 4.333 : amt / 52);
-        totalWeeklyBills += weeklyAmt;
-      }
-    });
-    const incomeWeekly = Number(budget.combinedIncomeWeekly || 3812);
-    const mortgageWeekly = currentMortgage / 4.333;
-    const totalWeeklyOutgoings = mortgageWeekly + totalWeeklyBills;
-    const disposableWeekly = incomeWeekly - totalWeeklyOutgoings;
+    // Payoff Timeline Acceleration with offset savings (USER UPDATE 5)
+    const monthlyOffsetSavings = savingsWeekly * 4.333333;
+    const payoff = Calculator.calculatePayoffTimeline(newLoan, interestRate, loanTerm, monthlyOffsetSavings, liquidBuffer);
+
+    // Percentage breakdown of salary for visual allocation bar:
+    const pctMortgage = Math.min(100, Math.max(0, Math.round((mortgageWeekly / salaryWeekly) * 100)));
+    const pctBills = Math.min(100, Math.max(0, Math.round((billsWeekly / salaryWeekly) * 100)));
+    const pctSavings = Math.min(100, Math.max(0, Math.round((savingsWeekly / salaryWeekly) * 100)));
+    const pctDisposable = Math.max(0, 100 - pctMortgage - pctBills - pctSavings);
 
     container.innerHTML = `
       <!-- Simulator Top Header -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
         <div>
           <h2 style="font-family: var(--font-serif); font-size: 26px; color: var(--text-main); margin-bottom: 4px;">
             Sale & Financial Simulator
           </h2>
           <p style="font-size: 14px; color: var(--text-muted); max-width: 800px;">
-            Model your home sale equity release, custom outgoings budget, target loan interest rates, and purchase cashflow surplus.
+            Model your home sale equity release, baseline household budget, target townhouse mortgage, and mortgage-free payoff timeline.
           </p>
         </div>
         <button class="btn-secondary" style="padding: 7px 14px; font-size: 13px;" onclick="app.resetFinancialDefaults()">
-          ↺ Reset to Spreadsheet Model
+          ↺ Reset to Defaults
         </button>
       </div>
 
       <div class="financial-grid">
-        <!-- Card 1: Existing Home Equity & Editable Baseline Budget (USER UPDATE 1) -->
+        <!-- CARD 1: BASELINE HOUSEHOLD BUDGET (USER UPDATE 3) -->
         <div class="finance-card">
-          <h3 class="finance-card-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            Current Home Sale & Equity Release
-          </h3>
-          <p class="finance-card-subtitle">Adjust sliders to see live net cash released from your home sale.</p>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <h3 class="finance-card-title" style="margin: 0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Baseline Household Budget
+            </h3>
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Step 1: Cashflow</span>
+          </div>
+          <p class="finance-card-subtitle">Transparent budget: track regular living commitments, current mortgage, and offset savings.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+            <!-- 1. Salary -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #FAFDFB; border: 1.5px solid var(--border-light); border-radius: var(--radius-md);">
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                  <span>💼 Salary (Household Net Income)</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">$${Math.round(salaryWeekly * 4.333333).toLocaleString()}/month combined</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-weight: 700; color: var(--text-main);">$</span>
+                <input type="number" value="${salaryWeekly}" style="width: 95px; padding: 6px 8px; font-size: 15px; font-weight: 800; border: 1px solid var(--border-medium); border-radius: 6px; text-align: right;" onchange="app.updateBudgetSalary(this.value)">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">/wk</span>
+              </div>
+            </div>
+
+            <!-- 2. Bills -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #FFFDF9; border: 1.5px solid var(--border-light); border-radius: var(--radius-md);">
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                  <span>🧾 Regular Bills & Living Expenses</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">$${Math.round(billsWeekly * 4.333333).toLocaleString()}/month (utilities, rates, food, pets)</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-weight: 700; color: var(--text-main);">$</span>
+                <input type="number" value="${billsWeekly}" style="width: 95px; padding: 6px 8px; font-size: 15px; font-weight: 800; border: 1px solid var(--border-medium); border-radius: 6px; text-align: right;" onchange="app.updateBudgetBills(this.value)">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">/wk</span>
+              </div>
+            </div>
+
+            <!-- 3. Mortgage -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #FFFDF9; border: 1.5px solid var(--border-light); border-radius: var(--radius-md);">
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                  <span>🏠 Current Mortgage</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">$${Math.round(mortgageWeekly).toLocaleString()}/wk ($${mortgageMonthly.toLocaleString()}/month)</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-weight: 700; color: var(--text-main);">$</span>
+                <input type="number" value="${mortgageMonthly}" style="width: 95px; padding: 6px 8px; font-size: 15px; font-weight: 800; border: 1px solid var(--border-medium); border-radius: 6px; text-align: right;" onchange="app.updateBudgetMortgage(this.value)">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">/mo</span>
+              </div>
+            </div>
+
+            <!-- 4. Savings (to offset) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #F2F8F4; border: 1.5px solid #C8E3CF; border-radius: var(--radius-md);">
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--sage); display: flex; align-items: center; gap: 6px;">
+                  <span>🏦 Savings (to Offset Account)</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">$${Math.round(savingsWeekly * 4.333333).toLocaleString()}/month direct to offset</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-weight: 700; color: var(--sage);">$</span>
+                <input type="number" value="${savingsWeekly}" style="width: 95px; padding: 6px 8px; font-size: 15px; font-weight: 800; color: var(--sage); border: 1.5px solid var(--sage); border-radius: 6px; text-align: right;" onchange="app.updateBudgetSavings(this.value)">
+                <span style="font-size: 12px; color: var(--sage); font-weight: 700;">/wk</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Remaining Disposable Income Hero Display (USER UPDATE 3) -->
+          <div style="background: linear-gradient(135deg, #FAFDFB 0%, #EFF8F2 100%); border: 2px solid var(--sage); border-radius: var(--radius-md); padding: 18px; text-align: center;">
+            <div style="font-size: 11.5px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px; color: var(--sage);">
+              Remaining Disposable Income
+            </div>
+            <div style="font-family: var(--font-display); font-size: 34px; font-weight: 800; color: var(--sage); margin: 4px 0;" id="budget-disposable-val">
+              +$${Math.round(disposableWeekly).toLocaleString()} <span style="font-size: 18px; font-weight: 600;">/wk</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-main);" id="budget-disposable-monthly">
+              +$${Math.round(disposableMonthly).toLocaleString()}/month free cash buffer
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+              Formula: Salary ($${salaryWeekly.toLocaleString()}) − Bills ($${billsWeekly.toLocaleString()}) − Mortgage ($${Math.round(mortgageWeekly).toLocaleString()}) − Offset Savings ($${savingsWeekly.toLocaleString()})
+            </div>
+          </div>
+
+          <!-- Visual Allocation Progress Bar -->
+          <div style="margin-top: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">
+              <span>Salary Allocation:</span>
+              <span>Mortgage (${pctMortgage}%) • Bills (${pctBills}%) • Offset (${pctSavings}%) • Cash (${pctDisposable}%)</span>
+            </div>
+            <div style="display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: #EEE;">
+              <div style="width: ${pctMortgage}%; background: #D97706;" title="Mortgage ${pctMortgage}%"></div>
+              <div style="width: ${pctBills}%; background: #E07A5F;" title="Bills ${pctBills}%"></div>
+              <div style="width: ${pctSavings}%; background: #2A9D8F;" title="Offset Savings ${pctSavings}%"></div>
+              <div style="width: ${pctDisposable}%; background: #264653;" title="Free Cash ${pctDisposable}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: CURRENT HOME SALE & EQUITY RELEASE (USER UPDATE 4) -->
+        <div class="finance-card">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <h3 class="finance-card-title" style="margin: 0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Current Home Sale & Equity Release
+            </h3>
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Step 2: Sale Equity</span>
+          </div>
+          <p class="finance-card-subtitle">Adjust sale price and commission % to model net cash unlocked for your next home.</p>
 
           <!-- Slider 1: Estimated Sale Price -->
           <div class="range-slider-group">
             <div class="range-slider-header">
-              <label for="slider-sale-price">Estimated Home Sale Price:</label>
-              <span class="range-slider-val" id="val-sale-price">$${Number(sale.estimatedSalePrice).toLocaleString()}</span>
+              <label for="slider-sale-price" style="font-weight: 700;">Estimated Home Sale Price:</label>
+              <span class="range-slider-val" id="val-sale-price" style="font-size: 17px; font-weight: 800;">$${salePrice.toLocaleString()}</span>
             </div>
-            <input type="range" class="app-slider" id="slider-sale-price" min="1100000" max="1900000" step="10000" value="${sale.estimatedSalePrice}" oninput="app.handleSaleSliderChange('estimatedSalePrice', this.value)">
+            <input type="range" class="app-slider" id="slider-sale-price" min="1100000" max="1900000" step="10000" value="${salePrice}" oninput="app.handleSaleSliderChange('estimatedSalePrice', this.value)">
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
               <span>$1.1M</span>
               <span>Modelled: $1.4M</span>
@@ -2819,10 +2954,10 @@ class PropertyHunterApp {
           <!-- Slider 2: Existing Mortgage -->
           <div class="range-slider-group">
             <div class="range-slider-header">
-              <label for="slider-mortgage">Less Current Mortgage Payoff:</label>
-              <span class="range-slider-val" id="val-mortgage" style="color: var(--terracotta);">- $${Number(sale.existingMortgage).toLocaleString()}</span>
+              <label for="slider-mortgage" style="font-weight: 700;">Less Current Mortgage Payoff:</label>
+              <span class="range-slider-val" id="val-mortgage" style="color: var(--terracotta); font-size: 16px; font-weight: 700;">- $${existingMortgage.toLocaleString()}</span>
             </div>
-            <input type="range" class="app-slider" id="slider-mortgage" min="500000" max="1000000" step="1000" value="${sale.existingMortgage}" oninput="app.handleSaleSliderChange('existingMortgage', this.value)">
+            <input type="range" class="app-slider" id="slider-mortgage" min="500000" max="1000000" step="1000" value="${existingMortgage}" oninput="app.handleSaleSliderChange('existingMortgage', this.value)">
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
               <span>$500k</span>
               <span>Actual: $806,992</span>
@@ -2830,189 +2965,218 @@ class PropertyHunterApp {
             </div>
           </div>
 
-          <!-- Slider 3: Agent Fees & Marketing -->
+          <!-- Slider 3: Agent Commission % Slider (USER UPDATE 4: 1% to 5%) -->
           <div class="range-slider-group">
             <div class="range-slider-header">
-              <label for="slider-selling-costs">Less Agent Commission & Marketing:</label>
-              <span class="range-slider-val" id="val-selling-costs" style="color: var(--terracotta);">- $${Number(sale.sellingExpenses).toLocaleString()}</span>
+              <label for="slider-agent-pct" style="font-weight: 700;">Less Real Estate Agent Commission (%):</label>
+              <span class="range-slider-val" id="val-agent-pct" style="color: var(--terracotta); font-size: 16px; font-weight: 800;">
+                ${agentPct.toFixed(1)}% (-$${agentFee.toLocaleString()})
+              </span>
             </div>
-            <input type="range" class="app-slider" id="slider-selling-costs" min="15000" max="80000" step="1000" value="${sale.sellingExpenses}" oninput="app.handleSaleSliderChange('sellingExpenses', this.value)">
+            <input type="range" class="app-slider" id="slider-agent-pct" min="1.0" max="5.0" step="0.1" value="${agentPct}" oninput="app.handleAgentPctSlider(this.value)">
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-              <span>$15k</span>
-              <span>Budget: $40k (~2.5%)</span>
-              <span>$80k</span>
+              <span>1.0% (Discount)</span>
+              <span>2.0% (Standard)</span>
+              <span>3.0%</span>
+              <span>5.0% (Premium)</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px;">
+              Includes estimated $4,000 marketing/legal fees. Total selling expenses: <strong>$${totalSellingExpenses.toLocaleString()}</strong>.
             </div>
           </div>
 
           <!-- Big Net Equity Banner -->
-          <div class="equity-visual-banner" style="margin: 18px 0; padding: 18px; border-radius: var(--radius-md); background: linear-gradient(135deg, #FAF4EE 0%, #F5EAE1 100%); border: 1px solid #EAD8C9; text-align: center;">
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Net Equity Released to Reinvest</div>
+          <div class="equity-visual-banner" style="margin: 18px 0 0 0; padding: 20px; border-radius: var(--radius-md); background: linear-gradient(135deg, #FAF4EE 0%, #F5EAE1 100%); border: 1.5px solid #EAD8C9; text-align: center;">
+            <div style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.6px;">
+              Net Cash Equity Released
+            </div>
             <div id="banner-net-equity" style="font-family: var(--font-display); font-size: 38px; font-weight: 800; color: var(--terracotta); margin: 4px 0;">
               $${Math.round(equity).toLocaleString()}
             </div>
-            <div style="font-size: 12px; color: var(--text-muted);">Cash available towards your target townhouse purchase</div>
-          </div>
-
-          <!-- EDITABLE BASELINE HOUSEHOLD BUDGET (USER UPDATE 1) -->
-          <div style="background: #FAFDFB; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 16px; margin-top: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <strong style="font-size: 14px; color: var(--text-main);">Baseline Household Budget</strong>
-                <div style="font-size: 12px; color: var(--text-muted);">Edit expenses or add custom categories.</div>
-              </div>
-              <button type="button" class="btn-primary" style="padding: 4px 10px; font-size: 12px;" onclick="app.openAddBudgetCategoryModal()">
-                + Add Category
-              </button>
-            </div>
-
-            <!-- Income & Savings Row -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); font-size: 12.5px;">
-              <div>
-                <span style="color: var(--text-muted); font-size: 11px; display: block;">Combined Income ($/wk):</span>
-                <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                  <span>$</span>
-                  <input type="number" value="${incomeWeekly}" style="width: 85px; padding: 4px 6px; font-size: 13px; font-weight: 700; border: 1px solid var(--border-medium); border-radius: 4px;" onchange="app.updateHouseholdIncome(this.value)">
-                  <span style="font-size: 11px; color: var(--text-muted);">/wk</span>
-                </div>
-              </div>
-              <div>
-                <span style="color: var(--text-muted); font-size: 11px; display: block;">Liquid Savings Buffer:</span>
-                <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                  <span>$</span>
-                  <input type="number" value="${Number(budget.liquidSavings || 75000)}" style="width: 85px; padding: 4px 6px; font-size: 13px; font-weight: 700; border: 1px solid var(--border-medium); border-radius: 4px;" onchange="app.updateLiquidSavings(this.value)">
-                </div>
-              </div>
-            </div>
-
-            <!-- Budget Categories List -->
-            <div style="display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto;">
-              ${categories.map(cat => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; border-bottom: 1px solid #F0F4F2; font-size: 12.5px;">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-weight: 600; color: var(--text-main);">${cat.name}</span>
-                    <span style="font-size: 10.5px; color: var(--text-muted); background: var(--bg-card-subtle); padding: 1px 5px; border-radius: 8px;">${cat.frequency}</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span>$</span>
-                    <input type="number" value="${cat.amount}" style="width: 70px; padding: 3px 6px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border-medium); border-radius: 4px;" onchange="app.updateBudgetCategoryAmount('${cat.id}', this.value)">
-                    ${!cat.isMortgage ? `
-                      <button type="button" onclick="app.deleteBudgetCategory('${cat.id}')" title="Delete category" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 0 4px;">✕</button>
-                    ` : ''}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- Live Summary Bar -->
-            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-light); font-size: 12.5px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <div>
-                <span style="color: var(--text-muted); font-size: 11px;">Total Outgoings:</span>
-                <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">$${Math.round(totalWeeklyOutgoings).toLocaleString()}/wk</div>
-                <div style="font-size: 11px; color: var(--text-muted);">($${Math.round(totalWeeklyOutgoings * 4.333).toLocaleString()}/mo)</div>
-              </div>
-              <div>
-                <span style="color: var(--sage); font-size: 11px; font-weight: 700;">Net Disposable Cash:</span>
-                <div style="font-weight: 800; color: var(--sage); font-size: 15px;">+$${Math.round(disposableWeekly).toLocaleString()}/wk</div>
-                <div style="font-size: 11px; color: var(--text-muted);">+$${Math.round(disposableWeekly * 4.333).toLocaleString()}/mo surplus</div>
-              </div>
+            <div style="font-size: 12.5px; color: var(--text-main); font-weight: 600;">
+              Available towards your next purchase deposit & costs
             </div>
           </div>
         </div>
 
-        <!-- Card 2: Interactive Purchase Target, Rate Slider & Sensitivity Matrix -->
-        <div class="finance-card">
-          <h3 class="finance-card-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Purchase Price Sensitivity & Cash Freed Up
-          </h3>
-          <p class="finance-card-subtitle">Drag the slider to test any purchase price and watch your repayments & cashflow update.</p>
+        <!-- CARD 3: TARGET TOWNHOUSE PURCHASE & MORTGAGE ACCELERATION (USER UPDATE 5 & 6) -->
+        <div class="finance-card" style="grid-column: 1 / -1;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+            <h3 class="finance-card-title" style="margin: 0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Target Townhouse Purchase & Mortgage Payoff Simulator
+            </h3>
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Step 3: Purchase & Debt Freedom</span>
+          </div>
+          <p class="finance-card-subtitle">Test any purchase price to see your new required loan, monthly cash freed up, and accelerated debt-free payoff date.</p>
 
-          <!-- 1. Target Purchase Price Slider & Calculation Box -->
-          <div class="range-slider-group" style="background: #FFFDF9; border: 1px solid #F0E3D5; border-radius: var(--radius-md); padding: 14px;">
-            <div class="range-slider-header">
-              <label for="slider-target-price" style="font-size: 14px; font-weight: 700; color: var(--text-main);">Target Townhouse Purchase Offer:</label>
-              <span class="range-slider-val" id="val-target-price" style="font-size: 20px; font-weight: 800; color: var(--terracotta);">$${Number(targetPrice).toLocaleString()}</span>
-            </div>
-            <input type="range" class="app-slider" id="slider-target-price" min="750000" max="1250000" step="10000" value="${targetPrice}" oninput="app.handlePurchaseTargetSlider(this.value)">
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-              <span>$750k</span>
-              <span>$950k (Everton Target)</span>
-              <span>$1.25M</span>
+          <!-- Top Row: Purchase Price Slider & Interest Rate -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-bottom: 20px;">
+            <!-- Target Price Slider -->
+            <div class="range-slider-group" style="background: #FFFDF9; border: 1.5px solid #F0E3D5; border-radius: var(--radius-md); padding: 16px;">
+              <div class="range-slider-header">
+                <label for="slider-target-price" style="font-size: 14px; font-weight: 700; color: var(--text-main);">Target Purchase Offer:</label>
+                <span class="range-slider-val" id="val-target-price" style="font-size: 22px; font-weight: 800; color: var(--terracotta);">$${targetPrice.toLocaleString()}</span>
+              </div>
+              <input type="range" class="app-slider" id="slider-target-price" min="750000" max="1250000" step="10000" value="${targetPrice}" oninput="app.handlePurchaseTargetSlider(this.value)">
+              
+              <!-- Quick Chips -->
+              <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+                ${[850000, 900000, 950000, 999000, 1050000].map(chipPrice => `
+                  <button type="button" class="filter-pill ${targetPrice === chipPrice ? 'active' : ''}" style="padding: 3px 8px; font-size: 11px;" onclick="app.setTargetPurchasePrice(${chipPrice})">
+                    $${(chipPrice / 1000).toFixed(0)}k
+                  </button>
+                `).join('')}
+              </div>
             </div>
 
-            <!-- Dynamic Live Calculation Box -->
-            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-medium); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
-              <div>
-                <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">QLD Stamp Duty (Home Concession):</span>
-                <div style="font-weight: 700; font-size: 15px;" id="calc-duty">$${Math.round(duty).toLocaleString()}</div>
+            <!-- Interest Rate Slider -->
+            <div class="range-slider-group" style="background: #FAFDFB; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 16px;">
+              <div class="range-slider-header">
+                <label for="slider-interest-rate" style="font-size: 14px; font-weight: 700; color: var(--text-main);">Target Loan Interest Rate:</label>
+                <span class="range-slider-val" id="val-interest-rate" style="font-size: 20px; font-weight: 800; color: var(--sage);">${interestRate.toFixed(1)}%</span>
               </div>
-              <div>
-                <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Required New Loan:</span>
-                <div style="font-weight: 700; font-size: 15px;" id="calc-loan">$${Math.round(newLoan).toLocaleString()}</div>
+              <input type="range" class="app-slider sage" id="slider-interest-rate" min="4.5" max="8.5" step="0.1" value="${interestRate}" oninput="app.handleLoanRateSlider(this.value)">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                <span>4.5%</span>
+                <span>Modelled: 6.2% (30-yr term)</span>
+                <span>8.5%</span>
               </div>
-              <div>
-                <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">New Monthly Repayments:</span>
-                <div style="font-weight: 700; font-size: 16px; color: var(--text-main);" id="calc-pni">$${Math.round(monthlyPni).toLocaleString()}/mo</div>
-              </div>
-              <div>
-                <span style="font-size: 11px; text-transform: uppercase; color: var(--sage); font-weight: 700;">Monthly Cash Freed Up:</span>
-                <div style="font-weight: 800; font-size: 19px; color: var(--sage);" id="calc-savings">+$${Math.round(monthlySaving).toLocaleString()}/mo</div>
-              </div>
-            </div>
-            <div style="margin-top: 8px; font-size: 12px; color: var(--text-muted); text-align: right;" id="calc-debt-reduction">
-              Debt reduced by <strong>$${Math.round(mortgageReduction).toLocaleString()}</strong> vs current $806k mortgage.
             </div>
           </div>
 
-          <!-- 2. TARGET LOAN INTEREST RATE SLIDER (USER UPDATE 2: UNDER PURCHASE SPACE & ABOVE SENSITIVITY TABLE) -->
-          <div class="range-slider-group" style="margin: 18px 0; background: #FAFDFB; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px 14px;">
-            <div class="range-slider-header">
-              <label for="slider-interest-rate" style="font-size: 13px; font-weight: 700;">Target Loan Interest Rate:</label>
-              <span class="range-slider-val" id="val-interest-rate">${interestRate.toFixed(1)}%</span>
+          <!-- Key Financial Metrics Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
+            <div style="background: #FDFEFE; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">QLD Stamp Duty (Home Concession):</span>
+              <div style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="calc-duty">$${Math.round(duty).toLocaleString()}</div>
+              <span style="font-size: 11px; color: var(--text-muted);">Principal residence</span>
             </div>
-            <input type="range" class="app-slider sage" id="slider-interest-rate" min="4.5" max="8.5" step="0.1" value="${interestRate}" oninput="app.handleLoanRateSlider(this.value)">
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-              <span>4.5%</span>
-              <span>Modelled: 6.2% (30-yr term)</span>
-              <span>8.5%</span>
+
+            <div style="background: #FDFEFE; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">Required New Mortgage:</span>
+              <div style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="calc-loan">$${Math.round(newLoan).toLocaleString()}</div>
+              <span style="font-size: 11px; color: var(--sage); font-weight: 700;" id="calc-debt-reduction">-$${Math.round(mortgageReduction).toLocaleString()} vs $806k debt</span>
+            </div>
+
+            <div style="background: #FDFEFE; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">New Monthly Repayment:</span>
+              <div style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="calc-pni">$${Math.round(monthlyPni).toLocaleString()}/mo</div>
+              <span style="font-size: 11px; color: var(--text-muted);" id="calc-pni-weekly">($${Math.round(monthlyPni / 4.333333).toLocaleString()}/wk)</span>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #FAFDFB 0%, #E8F5EC 100%); border: 1.5px solid #B8E2C4; border-radius: var(--radius-md); padding: 14px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--sage); font-weight: 800; display: block;">Monthly Cash Freed Up:</span>
+              <div style="font-size: 24px; font-weight: 800; color: var(--sage); margin-top: 2px;" id="calc-savings">+$${Math.round(monthlySaving).toLocaleString()}/mo</div>
+              <span style="font-size: 11px; color: var(--sage); font-weight: 600;" id="calc-savings-weekly">(+$${Math.round(monthlySaving / 4.333333).toLocaleString()}/wk surplus)</span>
             </div>
           </div>
 
-          <!-- 3. Sensitivity Comparison Table matching Jordan & Emma's Spreadsheet -->
+          <!-- USER UPDATE 5: MORTGAGE-FREE PAYOFF ACCELERATION BOX (YEARS & MONTH/YEAR) -->
+          <div style="background: linear-gradient(135deg, #F0F7F3 0%, #E2EEE6 100%); border: 2px solid #A8D5B5; border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 22px;">🎯</span>
+                <div>
+                  <h4 style="font-size: 16px; font-weight: 800; color: #1B4332; margin: 0;">
+                    Mortgage Payoff Timeline & Debt-Free Date
+                  </h4>
+                  <div style="font-size: 12px; color: #40916C;">
+                    Leveraging your <strong>$${savingsWeekly.toLocaleString()}/wk</strong> offset savings contribution
+                  </div>
+                </div>
+              </div>
+              <span style="font-size: 11.5px; font-weight: 700; background: white; color: var(--sage); padding: 3px 10px; border-radius: 12px; border: 1px solid #A8D5B5;">
+                Offset Savings Active
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px;">
+              <div style="background: white; border-radius: var(--radius-md); padding: 14px; border: 1px solid #D8EADF;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Years to Pay Off</div>
+                <div style="font-size: 26px; font-weight: 800; color: var(--sage); margin: 2px 0;" id="calc-payoff-years">
+                  ${payoff.payoffYears} Years
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">vs 30.0 yrs standard term</div>
+              </div>
+
+              <div style="background: white; border-radius: var(--radius-md); padding: 14px; border: 1px solid #D8EADF;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Mortgage-Free Date</div>
+                <div style="font-size: 24px; font-weight: 800; color: #1B4332; margin: 2px 0;" id="calc-payoff-date">
+                  ${payoff.payoffDateStr}
+                </div>
+                <div style="font-size: 11.5px; color: var(--sage); font-weight: 700;">Completely debt free!</div>
+              </div>
+
+              <div style="background: white; border-radius: var(--radius-md); padding: 14px; border: 1px solid #D8EADF;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Interest Saved</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--honey-dark); margin: 2px 0;" id="calc-interest-saved">
+                  $${Math.round(payoff.interestSaved).toLocaleString()}
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted);">Saved over loan life</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; font-size: 12px; color: #2D6A4F; line-height: 1.45;">
+              ✨ By channeling your $${savingsWeekly}/wk ($${Math.round(savingsWeekly * 4.333333).toLocaleString()}/mo) into your offset account alongside your $${Math.round(monthlySaving).toLocaleString()}/mo freed cashflow, your loan is paid off in <strong>${payoff.payoffYears} years</strong> instead of 30 years, saving <strong>$${Math.round(payoff.interestSaved).toLocaleString()}</strong> in interest.
+            </div>
+          </div>
+
+          <!-- Sensitivity Table -->
           <div>
-            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">Quick Offer Sensitivity Comparison:</div>
+            <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">Quick Offer Sensitivity Comparison:</div>
             <div style="overflow-x: auto;">
               <table style="width: 100%; font-size: 12.5px; border-collapse: collapse;">
                 <thead>
                   <tr style="border-bottom: 2px solid var(--border-light); text-align: left; background: var(--bg-card-subtle);">
-                    <th style="padding: 7px 8px;">Target Price</th>
-                    <th style="padding: 7px 8px;">New Mortgage</th>
-                    <th style="padding: 7px 8px;">Monthly P&I</th>
-                    <th style="padding: 7px 8px; color: var(--sage);">Monthly Savings</th>
-                    <th style="padding: 7px 8px; text-align: right;">Action</th>
+                    <th style="padding: 8px 10px;">Purchase Offer</th>
+                    <th style="padding: 8px 10px;">New Loan</th>
+                    <th style="padding: 8px 10px;">Monthly P&I</th>
+                    <th style="padding: 8px 10px; color: var(--sage);">Cash Freed Up</th>
+                    <th style="padding: 8px 10px;">Payoff Timeline</th>
+                    <th style="padding: 8px 10px; text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${[900000, 925000, 950000, 999000, 1040000].map(pPrice => {
+                  ${[850000, 900000, 950000, 999000, 1050000].map(pPrice => {
                     const rowDuty = Calculator.calculateQldTransferDuty(pPrice, true);
                     const rowLoan = Math.max(0, pPrice + rowDuty + otherCosts - equity);
                     const rowPni = Calculator.calculateMonthlyRepayment(rowLoan, interestRate, loanTerm);
-                    const rowSave = currentMortgage - rowPni;
+                    const rowSave = mortgageMonthly - rowPni;
+                    const rowPayoff = Calculator.calculatePayoffTimeline(rowLoan, interestRate, loanTerm, monthlyOffsetSavings, liquidBuffer);
                     const isSelected = Math.abs(targetPrice - pPrice) < 5000;
                     return `
                       <tr style="border-bottom: 1px solid var(--border-light); ${isSelected ? 'background: #FAF7F2; font-weight: bold;' : ''}">
-                        <td style="padding: 8px;">$${pPrice.toLocaleString()}</td>
-                        <td style="padding: 8px;">$${Math.round(rowLoan).toLocaleString()}</td>
-                        <td style="padding: 8px;">$${Math.round(rowPni).toLocaleString()}/mo</td>
-                        <td style="padding: 8px; color: var(--sage); font-weight: 700;">+$${Math.round(rowSave).toLocaleString()}/mo</td>
-                        <td style="padding: 8px; text-align: right;">
-                          <button type="button" class="btn-sage" style="padding: 2px 8px; font-size: 11px;" onclick="app.setTargetPurchasePrice(${pPrice})">Select</button>
+                        <td style="padding: 8px 10px;">$${pPrice.toLocaleString()}</td>
+                        <td style="padding: 8px 10px;">$${Math.round(rowLoan).toLocaleString()}</td>
+                        <td style="padding: 8px 10px;">$${Math.round(rowPni).toLocaleString()}/mo</td>
+                        <td style="padding: 8px 10px; color: var(--sage); font-weight: 700;">+$${Math.round(rowSave).toLocaleString()}/mo</td>
+                        <td style="padding: 8px 10px; color: var(--text-main); font-weight: 600;">${rowPayoff.payoffYears} yrs (${rowPayoff.payoffDateStr})</td>
+                        <td style="padding: 8px 10px; text-align: right;">
+                          <button type="button" class="btn-sage" style="padding: 3px 10px; font-size: 11px;" onclick="app.setTargetPurchasePrice(${pPrice})">Select</button>
                         </td>
                       </tr>
                     `;
                   }).join('')}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 4: AI FINANCIAL VERDICT (USER UPDATE 2 - KEEPS AI IN THE APP) -->
+        <div class="finance-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #FAF7F2 0%, #F5EFE6 100%); border: 1.5px solid #E6D9C8;">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #E07A5F 0%, #C85A32 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(200,90,50,0.25);">
+              🤖
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-serif); font-size: 17px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0;">
+                AI Financial Sanctuary Verdict
+              </h4>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-main); margin: 0;" id="ai-financial-summary">
+                Selling at <strong>$${salePrice.toLocaleString()}</strong> liberates <strong>$${Math.round(equity).toLocaleString()}</strong> in net cash equity. Downsizing to your target <strong>$${targetPrice.toLocaleString()}</strong> townhouse shrinks your mortgage from $806,992 down to <strong>$${Math.round(newLoan).toLocaleString()}</strong>, freeing up <strong>+$${Math.round(monthlySaving).toLocaleString()}/month</strong>. By continuing your <strong>$${savingsWeekly}/wk</strong> offset contribution, Emma & Jordan will be completely <strong>mortgage-free in ${payoff.payoffYears} years (${payoff.payoffDateStr})</strong>, saving <strong>$${Math.round(payoff.interestSaved).toLocaleString()}</strong> in bank interest!
+              </p>
             </div>
           </div>
         </div>
@@ -3550,9 +3714,6 @@ class PropertyHunterApp {
           <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
             <span class="badge-suburb">${p.suburb}</span>
             ${p.floorplanUrl ? `<span class="badge-suburb" style="background: rgba(37, 99, 235, 0.9);">📐 Floorplan Available</span>` : ''}
-            <button class="btn-plan-toggle ${isPlanned ? 'planned' : ''}" style="margin-left: auto;" onclick="app.toggleInspection('${p.id}')">
-              ${isPlanned ? '✓ In Inspection Plan' : '+ Add to Inspection Plan'}
-            </button>
           </div>
 
           <h2 style="font-family: var(--font-serif); font-size: 26px; color: var(--text-main); margin-bottom: 6px;">${p.address}</h2>
@@ -3671,18 +3832,6 @@ class PropertyHunterApp {
               </div>
             </div>
           </div>
-
-          ${p.inspectionTimes ? `
-            <div style="font-size: 13px; color: var(--text-main); margin-top: 8px; display: flex; align-items: center; gap: 6px;">
-              🗓️ Open Inspection: <strong>${p.inspectionTimes}</strong>
-              <button type="button" style="background: none; border: none; color: var(--terracotta); font-size: 11px; cursor: pointer; text-decoration: underline;" onclick="app.promptAddInspectionTime('${p.id}', event)">Change</button>
-            </div>
-          ` : `
-            <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 6px;">
-              🗓️ No open inspection set yet.
-              <button type="button" style="background: none; border: none; color: var(--terracotta); font-size: 11px; cursor: pointer; text-decoration: underline;" onclick="app.promptAddInspectionTime('${p.id}', event)">+ Add Inspection</button>
-            </div>
-          `}
 
           ${(() => {
             const targetUrl = this.getVerifiedListingUrl(p);
@@ -4433,8 +4582,21 @@ class PropertyHunterApp {
     this.finances.sale[field] = num;
 
     const sale = this.finances.sale;
-    const defaults = this.finances.purchaseDefaults;
+    
+    // If sale price changed, recalculate agent commission dollar amount
+    if (field === 'estimatedSalePrice') {
+      const pct = Number(sale.agentCommissionPct !== undefined ? sale.agentCommissionPct : 2.0);
+      const agentFee = Math.round(num * (pct / 100));
+      sale.sellingExpenses = agentFee + Number(sale.marketingAndLegal || 4000);
+      
+      const elAgent = document.getElementById('val-agent-pct');
+      if (elAgent) {
+        elAgent.textContent = `${pct.toFixed(1)}% (-$${agentFee.toLocaleString()})`;
+      }
+    }
+
     const equity = Calculator.calculateSaleEquity(sale.estimatedSalePrice, sale.existingMortgage, sale.sellingExpenses);
+    sale.netSaleEquity = equity;
 
     // Update readout labels
     if (field === 'estimatedSalePrice') {
@@ -4443,15 +4605,38 @@ class PropertyHunterApp {
     } else if (field === 'existingMortgage') {
       const el = document.getElementById('val-mortgage');
       if (el) el.textContent = `- $${num.toLocaleString()}`;
-    } else if (field === 'sellingExpenses') {
-      const el = document.getElementById('val-selling-costs');
-      if (el) el.textContent = `- $${num.toLocaleString()}`;
     }
 
     const bannerEl = document.getElementById('banner-net-equity');
     if (bannerEl) bannerEl.textContent = `$${Math.round(equity).toLocaleString()}`;
 
     // Update target calculation live
+    this.updateTargetCalculations();
+    this.recalculateAllMetrics();
+    this.renderHeaderStats();
+    this.saveDataLocally();
+  }
+
+  handleAgentPctSlider(value) {
+    const pct = parseFloat(value) || 2.0;
+    this.finances.sale.agentCommissionPct = pct;
+
+    const sale = this.finances.sale;
+    const salePrice = Number(sale.estimatedSalePrice || 1400000);
+    const agentFee = Math.round(salePrice * (pct / 100));
+    sale.sellingExpenses = agentFee + Number(sale.marketingAndLegal || 4000);
+
+    const elAgent = document.getElementById('val-agent-pct');
+    if (elAgent) {
+      elAgent.textContent = `${pct.toFixed(1)}% (-$${agentFee.toLocaleString()})`;
+    }
+
+    const equity = Calculator.calculateSaleEquity(sale.estimatedSalePrice, sale.existingMortgage, sale.sellingExpenses);
+    sale.netSaleEquity = equity;
+
+    const bannerEl = document.getElementById('banner-net-equity');
+    if (bannerEl) bannerEl.textContent = `$${Math.round(equity).toLocaleString()}`;
+
     this.updateTargetCalculations();
     this.recalculateAllMetrics();
     this.renderHeaderStats();
@@ -4492,6 +4677,7 @@ class PropertyHunterApp {
   updateTargetCalculations() {
     const sale = this.finances.sale;
     const defaults = this.finances.purchaseDefaults;
+    const budget = this.finances.householdBudget || DEFAULT_FINANCES.householdBudget;
     const equity = Calculator.calculateSaleEquity(sale.estimatedSalePrice, sale.existingMortgage, sale.sellingExpenses);
     const targetPrice = this.targetPurchasePrice || 950000;
     const duty = Calculator.calculateQldTransferDuty(targetPrice, true);
@@ -4505,17 +4691,37 @@ class PropertyHunterApp {
     const monthlySaving = currentMortgage - monthlyPni;
     const debtReduction = Math.max(0, (sale.existingMortgage || 806992) - newLoan);
 
+    // Payoff timeline
+    const savingsWeekly = Number(budget.savingsWeekly !== undefined ? budget.savingsWeekly : 500);
+    const liquidBuffer = Number(budget.liquidSavings !== undefined ? budget.liquidSavings : 75000);
+    const monthlyOffsetSavings = savingsWeekly * 4.333333;
+    const payoff = Calculator.calculatePayoffTimeline(newLoan, rate, term, monthlyOffsetSavings, liquidBuffer);
+
     const elDuty = document.getElementById('calc-duty');
     const elLoan = document.getElementById('calc-loan');
     const elPni = document.getElementById('calc-pni');
+    const elPniWk = document.getElementById('calc-pni-weekly');
     const elSavings = document.getElementById('calc-savings');
+    const elSavingsWk = document.getElementById('calc-savings-weekly');
     const elDebt = document.getElementById('calc-debt-reduction');
+    const elPayoffYears = document.getElementById('calc-payoff-years');
+    const elPayoffDate = document.getElementById('calc-payoff-date');
+    const elInterestSaved = document.getElementById('calc-interest-saved');
+    const elAiSummary = document.getElementById('ai-financial-summary');
 
     if (elDuty) elDuty.textContent = `$${Math.round(duty).toLocaleString()}`;
     if (elLoan) elLoan.textContent = `$${Math.round(newLoan).toLocaleString()}`;
     if (elPni) elPni.textContent = `$${Math.round(monthlyPni).toLocaleString()}/mo`;
+    if (elPniWk) elPniWk.textContent = `($${Math.round(monthlyPni / 4.333333).toLocaleString()}/wk)`;
     if (elSavings) elSavings.textContent = `+$${Math.round(monthlySaving).toLocaleString()}/mo`;
-    if (elDebt) elDebt.innerHTML = `Debt reduced by <strong>$${Math.round(debtReduction).toLocaleString()}</strong> vs current $806k mortgage.`;
+    if (elSavingsWk) elSavingsWk.textContent = `(+$${Math.round(monthlySaving / 4.333333).toLocaleString()}/wk surplus)`;
+    if (elDebt) elDebt.textContent = `-$${Math.round(debtReduction).toLocaleString()} vs $806k debt`;
+    if (elPayoffYears) elPayoffYears.textContent = `${payoff.payoffYears} Years`;
+    if (elPayoffDate) elPayoffDate.textContent = payoff.payoffDateStr;
+    if (elInterestSaved) elInterestSaved.textContent = `$${Math.round(payoff.interestSaved).toLocaleString()}`;
+    if (elAiSummary) {
+      elAiSummary.innerHTML = `Selling at <strong>$${Number(sale.estimatedSalePrice).toLocaleString()}</strong> liberates <strong>$${Math.round(equity).toLocaleString()}</strong> in net cash equity. Downsizing to your target <strong>$${targetPrice.toLocaleString()}</strong> townhouse shrinks your mortgage from $806,992 down to <strong>$${Math.round(newLoan).toLocaleString()}</strong>, freeing up <strong>+$${Math.round(monthlySaving).toLocaleString()}/month</strong>. By continuing your <strong>$${savingsWeekly}/wk</strong> offset contribution, Emma & Jordan will be completely <strong>mortgage-free in ${payoff.payoffYears} years (${payoff.payoffDateStr})</strong>, saving <strong>$${Math.round(payoff.interestSaved).toLocaleString()}</strong> in bank interest!`;
+    }
   }
 
   // Generic Profile & Decision Priorities Handlers
@@ -4745,9 +4951,10 @@ class PropertyHunterApp {
   }
 
   resetFinancialDefaults() {
-    if (!confirm('Reset financial sale & loan settings to your Excel model ($1.4M sale, $806,992 mortgage, $40k expenses, 6.2% rate)?')) return;
-    this.finances.sale = { ...DEFAULT_FINANCES.sale };
-    this.finances.purchaseDefaults = { ...DEFAULT_FINANCES.purchaseDefaults };
+    if (!confirm('Reset financial sale & loan settings to default model ($1.4M sale, $806,992 mortgage, 2.0% agent fee, 6.2% rate)?')) return;
+    this.finances.sale = JSON.parse(JSON.stringify(DEFAULT_FINANCES.sale));
+    this.finances.purchaseDefaults = JSON.parse(JSON.stringify(DEFAULT_FINANCES.purchaseDefaults));
+    this.finances.householdBudget = JSON.parse(JSON.stringify(DEFAULT_FINANCES.householdBudget));
     this.targetPurchasePrice = 950000;
     this.recalculateAllMetrics();
     this.saveDataLocally();
@@ -4755,118 +4962,75 @@ class PropertyHunterApp {
     this.renderFinancialSimulator();
     this.renderHeaderStats();
     this.renderProperties();
-    alert('✅ Reset to original spreadsheet model ($553,008 Net Equity)!');
+    alert('✅ Reset to default financial model ($561,008 Net Equity)!');
   }
 
-  // --- Baseline Household Budget Methods ---
-  openAddBudgetCategoryModal() {
-    const modal = document.getElementById('budget-category-modal');
-    if (!modal) return;
-    const nameEl = document.getElementById('new-budget-name');
-    const amtEl = document.getElementById('new-budget-amount');
-    const freqEl = document.getElementById('new-budget-freq');
-    if (nameEl) nameEl.value = '';
-    if (amtEl) amtEl.value = '';
-    if (freqEl) freqEl.value = 'weekly';
-    modal.classList.add('active');
-  }
-
-  closeBudgetCategoryModal() {
-    const modal = document.getElementById('budget-category-modal');
-    if (modal) modal.classList.remove('active');
-  }
-
-  saveNewBudgetCategory() {
-    const nameEl = document.getElementById('new-budget-name');
-    const amtEl = document.getElementById('new-budget-amount');
-    const freqEl = document.getElementById('new-budget-freq');
-    const name = nameEl ? nameEl.value.trim() : '';
-    const amount = amtEl ? parseFloat(amtEl.value) : 0;
-    const freq = freqEl ? freqEl.value : 'weekly';
-
-    if (!name) {
-      alert('Please enter a category name (e.g. Gym & Sports, Dining Out, Pet Insurance).');
-      return;
-    }
-    if (isNaN(amount) || amount < 0) {
-      alert('Please enter a valid expense amount.');
-      return;
-    }
-
-    if (!this.finances.householdBudget) {
-      this.finances.householdBudget = JSON.parse(JSON.stringify(DEFAULT_FINANCES.householdBudget));
-    }
-    if (!this.finances.householdBudget.categories) {
-      this.finances.householdBudget.categories = [];
-    }
-
-    const newCat = {
-      id: 'cat-' + Date.now(),
-      name: name,
-      amount: Math.round(amount),
-      frequency: freq,
-      isMortgage: false
-    };
-
-    this.finances.householdBudget.categories.push(newCat);
+  // --- Simplified Baseline Household Budget Methods (USER UPDATE 3) ---
+  updateBudgetSalary(newIncome) {
+    const salary = Math.max(0, parseFloat(newIncome) || 0);
+    if (!this.finances.householdBudget) this.finances.householdBudget = {};
+    this.finances.householdBudget.salaryWeekly = salary;
+    if (this.finances.sale) this.finances.sale.combinedIncome = salary;
+    this.recalculateBudgetDisposable();
     this.saveDataLocally();
-    this.syncFinancesToBackend();
-    this.closeBudgetCategoryModal();
-    this.renderFinancialSimulator();
   }
 
-  updateBudgetCategoryAmount(catId, newAmount) {
-    const amt = parseFloat(newAmount);
-    if (isNaN(amt) || amt < 0) return;
-
-    if (!this.finances.householdBudget || !this.finances.householdBudget.categories) return;
-    const cat = this.finances.householdBudget.categories.find(c => c.id === catId);
-    if (cat) {
-      cat.amount = Math.round(amt);
-      this.saveDataLocally();
-      this.syncFinancesToBackend();
-      this.renderFinancialSimulator();
-    }
-  }
-
-  deleteBudgetCategory(catId) {
-    if (!this.finances.householdBudget || !this.finances.householdBudget.categories) return;
-    const cat = this.finances.householdBudget.categories.find(c => c.id === catId);
-    if (!cat) return;
-    if (cat.isMortgage) {
-      alert('Mortgage repayment is tied to your loan calculation and cannot be deleted.');
-      return;
-    }
-    if (!confirm(`Remove "${cat.name}" ($${cat.amount}/${cat.frequency.replace('ly','')}) from your baseline budget?`)) return;
-
-    this.finances.householdBudget.categories = this.finances.householdBudget.categories.filter(c => c.id !== catId);
+  updateBudgetBills(newBills) {
+    const bills = Math.max(0, parseFloat(newBills) || 0);
+    if (!this.finances.householdBudget) this.finances.householdBudget = {};
+    this.finances.householdBudget.billsWeekly = bills;
+    if (this.finances.sale) this.finances.sale.currentWeeklyBillsExMortgage = bills;
+    this.recalculateBudgetDisposable();
     this.saveDataLocally();
-    this.syncFinancesToBackend();
-    this.renderFinancialSimulator();
   }
 
-  updateHouseholdIncome(newIncome) {
-    const income = parseFloat(newIncome);
-    if (isNaN(income) || income < 0) return;
-    if (!this.finances.householdBudget) {
-      this.finances.householdBudget = JSON.parse(JSON.stringify(DEFAULT_FINANCES.householdBudget));
-    }
-    this.finances.householdBudget.weeklyCombinedIncome = Math.round(income);
+  updateBudgetMortgage(newMortgage) {
+    const mortgage = Math.max(0, parseFloat(newMortgage) || 0);
+    if (!this.finances.householdBudget) this.finances.householdBudget = {};
+    this.finances.householdBudget.mortgageMonthly = mortgage;
+    if (this.finances.sale) this.finances.sale.currentMonthlyMortgage = mortgage;
+    this.recalculateBudgetDisposable();
+    this.updateTargetCalculations();
+    this.recalculateAllMetrics();
     this.saveDataLocally();
-    this.syncFinancesToBackend();
-    this.renderFinancialSimulator();
+  }
+
+  updateBudgetSavings(newSavings) {
+    const savings = Math.max(0, parseFloat(newSavings) || 0);
+    if (!this.finances.householdBudget) this.finances.householdBudget = {};
+    this.finances.householdBudget.savingsWeekly = savings;
+    this.recalculateBudgetDisposable();
+    this.updateTargetCalculations();
+    this.saveDataLocally();
+  }
+
+  recalculateBudgetDisposable() {
+    const b = this.finances.householdBudget || {};
+    const salary = Number(b.salaryWeekly !== undefined ? b.salaryWeekly : 3812);
+    const bills = Number(b.billsWeekly !== undefined ? b.billsWeekly : 750);
+    const mortgageMonthly = Number(this.finances.sale?.currentMonthlyMortgage || 4810);
+    const mortgageWeekly = mortgageMonthly / 4.333333;
+    const savings = Number(b.savingsWeekly !== undefined ? b.savingsWeekly : 500);
+
+    const totalOutgoings = bills + mortgageWeekly + savings;
+    const disposable = salary - totalOutgoings;
+    const disposableMonthly = disposable * 4.333333;
+
+    const elVal = document.getElementById('budget-disposable-val');
+    const elMo = document.getElementById('budget-disposable-monthly');
+    if (elVal) elVal.innerHTML = `+$${Math.round(disposable).toLocaleString()} <span style="font-size: 18px; font-weight: 600;">/wk</span>`;
+    if (elMo) elMo.textContent = `+$${Math.round(disposableMonthly).toLocaleString()}/month free cash buffer`;
   }
 
   updateLiquidSavings(newSavings) {
-    const savings = parseFloat(newSavings);
-    if (isNaN(savings) || savings < 0) return;
+    const savings = Math.max(0, parseFloat(newSavings) || 0);
     if (!this.finances.householdBudget) {
       this.finances.householdBudget = JSON.parse(JSON.stringify(DEFAULT_FINANCES.householdBudget));
     }
     this.finances.householdBudget.liquidSavings = Math.round(savings);
+    this.updateTargetCalculations();
     this.saveDataLocally();
     this.syncFinancesToBackend();
-    this.renderFinancialSimulator();
   }
   // --- Property.com.au & PropTrack Integration Methods ---
   lookupPropertyComAu(propId, event) {
