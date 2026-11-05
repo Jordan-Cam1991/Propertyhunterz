@@ -1698,9 +1698,6 @@ class PropertyHunterApp {
       case 'properties':
         this.renderProperties();
         break;
-      case 'compare':
-        this.renderComparisonView();
-        break;
       case 'finances':
         this.renderFinancialSimulator();
         break;
@@ -1790,24 +1787,10 @@ class PropertyHunterApp {
     }
 
     grid.innerHTML = filtered.map(p => this.createPropertyCardHtml(p)).join('');
-
-    grid.querySelectorAll('.compare-card-cb').forEach(cb => {
-      cb.addEventListener('change', (e) => {
-        const id = e.target.dataset.id;
-        if (e.target.checked) {
-          this.selectedForCompare.add(id);
-        } else {
-          this.selectedForCompare.delete(id);
-        }
-        this.updateFloatingCompareBar();
-      });
-    });
   }
 
   createPropertyCardHtml(p) {
     const scores = p.aiScores || { overallFit: 70, emmaScore: 70, jordanScore: 70, furBabiesScore: 70 };
-    const isPlanned = this.plannedInspections.has(p.id);
-    const isCompared = this.selectedForCompare.has(p.id);
 
     const getScoreColorClass = (score) => {
       if (score >= 80) return 'score-high';
@@ -1968,12 +1951,8 @@ class PropertyHunterApp {
             </div>
           ` : ''}
 
-          <!-- Footer: Compare, Recycle Bin, View Breakdown (Centered along bottom) -->
+          <!-- Footer: Recycle Bin & View Breakdown -->
           <div class="card-footer">
-            <button type="button" class="btn-card-compare ${isCompared ? 'active' : ''}" onclick="app.toggleCompare('${p.id}', event)" title="Select to compare">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              <span>${isCompared ? '✓ Comparing' : 'Compare'}</span>
-            </button>
             <button type="button" class="btn-card-delete" onclick="event.stopPropagation(); app.deleteProperty('${p.id}')" title="Delete listing" aria-label="Delete listing">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -1982,7 +1961,7 @@ class PropertyHunterApp {
                 <line x1="14" y1="11" x2="14" y2="17"></line>
               </svg>
             </button>
-            <button type="button" class="btn-primary btn-card-breakdown" onclick="app.openDetailDrawer('${p.id}')">
+            <button type="button" class="btn-primary btn-card-breakdown" style="flex-grow: 1;" onclick="app.openDetailDrawer('${p.id}')">
               View Breakdown
             </button>
           </div>
@@ -2156,185 +2135,7 @@ class PropertyHunterApp {
     alert('✅ Restored candidate properties to your Property Hub!');
   }
 
-  updateFloatingCompareBar() {
-    const bar = document.getElementById('compare-floating-bar');
-    const countEl = document.getElementById('compare-count-badge');
-    if (!bar) return;
 
-    const count = this.selectedForCompare.size;
-    if (count > 0) {
-      bar.classList.add('active');
-      if (countEl) countEl.textContent = `${count} Selected`;
-    } else {
-      bar.classList.remove('active');
-    }
-  }
-
-  // -------------------------------------------------------------
-  // VIEW 2: HEAD-TO-HEAD COMPARISON
-  // -------------------------------------------------------------
-  renderComparisonView() {
-    const container = document.getElementById('comparison-view-content');
-    if (!container) return;
-
-    let compareIds = Array.from(this.selectedForCompare);
-    if (compareIds.length === 0) {
-      compareIds = this.properties.slice(0, 3).map(p => p.id);
-    }
-
-    const comparedProps = this.properties.filter(p => compareIds.includes(p.id));
-
-    if (comparedProps.length < 2) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
-          <div style="font-size: 40px; margin-bottom: 12px;">⚖️</div>
-          <h3 style="font-family: var(--font-serif); font-size: 20px; margin-bottom: 8px;">Select At Least 2 Properties to Compare</h3>
-          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">Check the 'Select to Compare' box on your favorite townhouses in the Property Hub.</p>
-          <button class="btn-primary" onclick="app.switchTab('properties')">Go to Property Hub</button>
-        </div>
-      `;
-      return;
-    }
-
-    const winnerId = (typeof AIEngine !== 'undefined' && typeof AIEngine.getWinner === 'function')
-      ? AIEngine.getWinner(comparedProps)
-      : (comparedProps[0]?.id || null);
-
-    container.innerHTML = `
-      <div style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--border-light); padding: 24px; box-shadow: var(--shadow-sm); overflow-x: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <h2 style="font-family: var(--font-serif); font-size: 24px; color: var(--text-main);">Head-to-Head Comparison Matrix</h2>
-            <p style="font-size: 13.5px; color: var(--text-muted);">Side-by-side financial, lifestyle, and pet accessibility trade-offs.</p>
-          </div>
-          <button class="btn-secondary" onclick="app.clearCompareSelection()">Clear All Selected (${comparedProps.length})</button>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; min-width: 680px; font-size: 13.5px;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--border-light);">
-              <th style="text-align: left; padding: 14px 12px; width: 220px; background: var(--bg-card-subtle);">Feature / Decision Anchor</th>
-              ${comparedProps.map(p => `
-                <th style="padding: 14px 12px; text-align: center; background: ${p.id === winnerId ? 'var(--bg-sage-soft)' : 'white'};">
-                  ${p.id === winnerId ? `<div style="font-size: 11px; font-weight: 800; color: var(--sage); text-transform: uppercase; margin-bottom: 4px;">👑 AI Overall Pick</div>` : ''}
-                  <div style="font-weight: 700; font-size: 15px; color: var(--text-main);">${p.address}</div>
-                  <span class="badge-suburb" style="margin-top: 4px; display: inline-block;">${p.suburb}</span>
-                </th>
-              `).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Modelled Purchase Price</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 700; font-family: var(--font-display); font-size: 16px; color: var(--terracotta);">
-                  $${(p.modelledPrice || 0).toLocaleString()}
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Monthly Mortgage Repayment</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 600;">
-                  $${Math.round(p.monthlyMortgage || 0).toLocaleString()}/mo
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Monthly Body Corporate</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center;">
-                  $${Math.round(p.monthlyBodyCorp || 0).toLocaleString()}/mo
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light); background: #FAFDFB;">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle); color: var(--sage);">Monthly Cash Freed Up</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 800; font-family: var(--font-display); font-size: 17px; color: var(--sage);">
-                  +$${Math.round(p.monthlySaving || 0).toLocaleString()}/mo
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Bedrooms / Bathrooms / Cars</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center;">
-                  <strong>${p.bedrooms}</strong> Beds · <strong>${p.bathrooms}</strong> Baths · <strong>${p.parkingSpaces || 2}</strong> Car
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Levels & Pet Accessibility</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center;">
-                  ${Number(p.levels) <= 2 ? `
-                    <span style="color: var(--sage); font-weight: 700;">✅ ${p.levels} Levels (${p.outdoorSpace || 'Courtyard'})</span>
-                  ` : `
-                    <span style="color: var(--rose-alert); font-weight: 700;">⚠️ ${p.levels} Levels (Stair hazard for 14yo dog)</span>
-                  `}
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Commute to Eight Mile Plains</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center;">
-                  ${p.distances?.workEMP || (p.suburb.includes('Morningside') ? '20-22 mins' : '38-42 mins')}
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Proximity to Callum & Kaitlin</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center;">
-                  ${p.suburb.includes('Everton') ? '<strong style="color: var(--sage);">5-7 mins</strong>' : '35-36 mins'}
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">AI Overall Fit Score</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 800; font-size: 16px; color: var(--terracotta);">
-                  ${p.aiScores?.overallFit || 75}% Match
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Emma Match Score</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 700; color: ${(p.aiScores?.emmaScore || 70) >= 75 ? 'var(--sage)' : 'var(--terracotta)'};">
-                  ${p.aiScores?.emmaScore || 70}%
-                </td>
-              `).join('')}
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-light);">
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Jordan Match Score</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-weight: 700; color: ${(p.aiScores?.jordanScore || 70) >= 75 ? 'var(--sage)' : 'var(--terracotta)'};">
-                  ${p.aiScores?.jordanScore || 70}%
-                </td>
-              `).join('')}
-            </tr>
-            <tr>
-              <td style="padding: 12px; font-weight: 700; background: var(--bg-card-subtle);">Key Compromise / Trade-off</td>
-              ${comparedProps.map(p => `
-                <td style="padding: 12px; text-align: center; font-size: 12.5px; color: var(--honey-dark);">
-                  ${p.keyCompromise || 'Standard trade-offs'}
-                </td>
-              `).join('')}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  clearCompareSelection() {
-    this.selectedForCompare.clear();
-    this.updateFloatingCompareBar();
-    this.renderComparisonView();
-  }
 
   // -------------------------------------------------------------
   // VIEW: INSPECTION PLANNER & SATURDAY ROUTE
@@ -4131,21 +3932,6 @@ class PropertyHunterApp {
     imgEl.src = imgUrl;
     if (titleEl) titleEl.textContent = `Architectural Floor Plan — ${address}`;
     modal.classList.add('open');
-  }
-
-  toggleCompare(propId, event) {
-    if (event) event.stopPropagation();
-    if (this.selectedForCompare.has(propId)) {
-      this.selectedForCompare.delete(propId);
-    } else {
-      this.selectedForCompare.add(propId);
-      if (this.selectedForCompare.size >= 2) {
-        // Automatically switch to comparison view when 2 properties are selected!
-        this.switchTab('compare');
-        return;
-      }
-    }
-    this.renderProperties();
   }
 
   async deleteProperty(propId) {
