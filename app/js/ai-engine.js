@@ -185,6 +185,20 @@ const AIEngine = {
       pros,
       cons
     };
+  },
+
+  getWinner(properties) {
+    if (!properties || properties.length === 0) return null;
+    let best = properties[0];
+    let bestScore = -1;
+    for (const p of properties) {
+      const score = Number(p.aiScores?.overallFit) || 0;
+      if (score > bestScore) {
+        bestScore = score;
+        best = p;
+      }
+    }
+    return best ? best.id : null;
   }
 };
 

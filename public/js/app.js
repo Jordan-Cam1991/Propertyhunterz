@@ -2196,7 +2196,9 @@ class PropertyHunterApp {
       return;
     }
 
-    const winnerId = AIEngine.getWinner(comparedProps);
+    const winnerId = (typeof AIEngine !== 'undefined' && typeof AIEngine.getWinner === 'function')
+      ? AIEngine.getWinner(comparedProps)
+      : (comparedProps[0]?.id || null);
 
     container.innerHTML = `
       <div style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--border-light); padding: 24px; box-shadow: var(--shadow-sm); overflow-x: auto;">
